@@ -16,7 +16,7 @@ The idea is simple. We want to connect the tapio ecosystem with [IFTTT](https://
 
 ### IFTTT
 
-IFTTT or "**IF T**his **T**hen **T**hat" is an IoT (Internet of Things) automation platform. As the name suggests it's all about very simple connections like:
+IFTTT or "**IF T**his **T**hen **T**hat" is an IoT (Internet of Things) automation platform. As the name suggests it's all about very simple connections like these:
 
 * **IF** I like a music video on YouTube **THEN** add it to my Spotify library.
 * **IF** my vacuum cleaner is stuck somewhere **THEN** send me a push notification.
@@ -31,3 +31,32 @@ IFTTT or "**IF T**his **T**hen **T**hat" is an IoT (Internet of Things) automati
 #### IFTTT Actions
 
 ## The Implementation Plan
+
+### Building a demo machine
+
+* must run a opc ua server
+* cc should run
+* must have input we can trigger
+* must have action we can trigger
+
+The first idea that comes to mind is to use a [Raspberry Pi](https://www.raspberrypi.org/). It's cheap, reliable and setup fast.
+
+* install raspbian
+* setup ssh
+* install dotnet
+* setup remote debugging
+* setup cc
+* setup motion sensor
+* setup rgb led
+
+### Building the connector
+
+* uses webhooks
+* must listen for events
+  * from IFTTT
+  * from tapio eventhub
+  * or simple stateAPI polling
+* must be able to send events to IFTTT
+* must be able to send "events" (stateAPI calls) to tapio
+* ngrok as tool
+* auth?
