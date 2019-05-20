@@ -83,17 +83,16 @@ Quick summary:
 * Install [dotnet](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script)
 * Setup [tapio CloudConnector](https://developer.tapio.one/docs/CloudConnector/CloudConnectorCore.html)
 * Setup [remote debugging with VS Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
-* Setup the PIR sensor and the RGG LED using the GPIO interface and a library like [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio).
+* Setup the PIR sensor and the RGG LED using the GPIO interface and a library like [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and deploy an OPC UA server which monitors the motion sensor and controls the RGB LED.
 
 ### Building the connector
 
+The tapio-IFTTT connector should be capable of:
 
-* uses webhooks
-* must listen for events
-  * from IFTTT
-  * from tapio eventhub
-  * or simple stateAPI polling
-* must be able to send events to IFTTT
-* must be able to send "events" (stateAPI calls) to tapio
-* ngrok as tool
-* auth?
+* Send and receive events from IFTTT over Webhooks
+* Send and receive events from tapio using
+  * Microsoft Azure EventHub
+  * tapio StateAPI
+* Authenticating event processing requests
+
+>For testing Webhooks the tiny program **ngrok** can come in handy. Ngrok can forward requets from the web to your local developer machine.
