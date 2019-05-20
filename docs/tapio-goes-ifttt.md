@@ -61,22 +61,29 @@ After connecting the IFTTT Webhook service to your IFTTT account you can look up
 
 ### Building a demo machine
 
-* must run a opc ua server
-* cc should run
-* must have input we can trigger
-* must have action we can trigger
+The greatest tapio-IFTTT connector isn't worth anything if one can't show its features. Therefore we will build a demo machine which
 
-The first idea that comes to mind is to use a [Raspberry Pi](https://www.raspberrypi.org/). It's cheap, reliable and setup fast.
+* can run the tapio CloudConnector,
+* can run an OPC UA server,
+* has an input so that we can trigger events
+* and has an output so that it can process actions.
 
-* install raspbian
-* setup ssh
-* install dotnet
-* setup remote debugging
-* setup cc
-* setup motion sensor
-* setup rgb led
+The first idea that comes to mind is to use a [Raspberry Pi](https://www.raspberrypi.org/). It's cheap, reliable and easy to set up. It also provides a GPIO interface which we can use to connect any input or output component like this [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) PIR sensor as input
 
-Unosquare.RaspberryIO
+![am312](assets/am312.jpg)
+
+and this simple RGB LED as output.
+
+![rgb-led](assets/rgb-led.jpg)
+
+Quick summary:
+
+* Install [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/)
+* Setup SSH access
+* Install [dotnet](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script)
+* Setup [tapio CloudConnector](https://developer.tapio.one/docs/CloudConnector/CloudConnectorCore.html)
+* Setup [remote debugging with VS Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
+* Setup the PIR sensor and the RGG LED using the GPIO interface and a library like [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio).
 
 ### Building the connector
 
