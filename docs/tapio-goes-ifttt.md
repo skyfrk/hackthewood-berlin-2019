@@ -54,11 +54,30 @@ Example with a trigger provided by Reddit and an action provided by IFTTT:
 Integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) is a project on it's own and requires access to tapio internal structures and a contract between tapio and IFTTT.
 ![ifttt-service-integration-timeline](assets/ifttt-service-integration-timeline.png)
 
-Therefore we will use an IFTTT service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what a Webhook is but it's common sense to think of a Webhook as an endpoint for a http call which when called triggers something. You could also think of a Webhook being a function call over the internet. The IFTTT Webhook service provides a trigger which can receive http calls and an action which can send http calls
+Therefore we will use an IFTTT service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what a Webhook is but it's common sense to think of a Webhook as an endpoint for a http call which when called triggers something. You could also think of a Webhook being a function call over the internet. The IFTTT Webhook service provides a trigger which can receive http calls and an action which can send http calls which can be used to inject and receive events from IFTTT.
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
-After connecting the IFTTT Webhook service to your IFTTT account you can look up your individual URL on the [service page](https://ifttt.com/maker_webhooks).
+>After connecting the IFTTT Webhook service to your IFTTT account you can look up your individual URL on the [service page](https://ifttt.com/maker_webhooks).
+
+There are two event flows we have to implement:
+From tapio-ready machines to IFTTT and from IFTTT to tapio ready machines.
+
+First event flow:
+
+* Machine state like temperature sensor changes.
+* The state update is mirrored in a OPC UA item on the machines OPC UA server.
+* tapio CloudConnector sends the state update event to the tapio core.
+* Core forwards the event to the configured EventHub.
+* The tapio-IFTTT-Connector ([a Azure Function](https://azure.microsoft.com/en-us/services/functions/)) receives the event from EventHub and forwards it to IFTTT via Webhook.
+* A IFTTT-Applet is triggered.
+
+Second event flow:
+
+* An IFTTT-Applet triggers a Webhook request which is registered in our connector.
+* The tapio-IFTTT-Connector ([another Azure Function](https://azure.microsoft.com/en-us/services/functions/)) receives the http call and forwards the event to tapio core using [tapio commanding](https://developer.tapio.one/docs/Commanding.html).
+* tapio core forwards the event to tapio CloudConnector (running on the machine).
+* tapio CloudConnector forwards the event to the machines OPC UA server.
 
 ### Building a demo machine
 
@@ -90,10 +109,12 @@ Quick summary:
 
 The tapio-IFTTT connector should be capable of:
 
-* Send and receive events from IFTTT over Webhooks
-* Send and receive events from tapio using
-  * Microsoft Azure EventHub
-  * tapio StateAPI
-* Authenticating event processing requests
+* Receive events from EventHub and send them to IFTTT.
+* Receive events from a http call (IFTTT Webhook service) and send them to tapio-ready machines.
 
->For testing Webhooks the tiny program **ngrok** can come in handy. Ngrok can forward requets from the web to your local developer machine.
+>For testing Webhooks the tiny program [ngrok](https://ngrok.com/) can come in handy. Ngrok can forward requests from the web to your local developer machine.
+
+[Azure Functions](https://azure.microsoft.com/en-us/services/functions/)
+
+
+
