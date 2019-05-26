@@ -112,9 +112,12 @@ The tapio-IFTTT connector should be capable of:
 * Receive events from EventHub and send them to IFTTT.
 * Receive events from a http call (IFTTT Webhook service) and send them to tapio-ready machines.
 
+Both capabilities can be build using [Azure Functions](https://azure.microsoft.com/en-us/services/functions/) which let us skip implementing a bloated console application and also enables easy scaling.
+
+>Azure Functions are Azure's approach for [serverless computing](https://martinfowler.com/articles/serverless.html)
+
 >For testing Webhooks the tiny program [ngrok](https://ngrok.com/) can come in handy. Ngrok can forward requests from the web to your local developer machine.
 
-[Azure Functions](https://azure.microsoft.com/en-us/services/functions/)
+## CI & CD
 
-
-
+TODO
