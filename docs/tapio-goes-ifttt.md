@@ -47,13 +47,14 @@ Example with a trigger provided by Reddit and an action provided by IFTTT:
 
 ![applet-example](assets/applet-example.png)
 
->Both triggers and actions provide fields which can be used to transfer data through a complete automation (eg. a link to post on Facebook).
+>Both triggers and actions provide fields which can be used to transfer data through a complete automation (eg. a link to a post on Facebook).
 
 ## The Implementation Plan
 
-Integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) is a project on it's own and requires access to tapio internal structures and a contract between tapio and IFTTT.[ifttt-service-integration-timeline](assets/ifttt-service-integration-timeline.png)
+Integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) is a project on it's own and requires access to tapio internal structures and a contract between tapio and IFTTT.
+![ifttt-service-integration-timeline](assets/ifttt-service-integration-timeline.png)
 
-Therefore we will use an IFTTT service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what a Wehhook is but it's common sense to think of a Webhook as an endpoint for a http call which when called triggers something. You could also think of a Webhook being a function call over the interwebs. The IFTTT Webhook service provides a trigger which can receive http calls and an action which can send http calls:
+Therefore we will use an IFTTT service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what a Webhook is but it's common sense to think of a Webhook as an endpoint for a http call which when called triggers something. You could also think of a Webhook being a function call over the internet. The IFTTT Webhook service provides a trigger which can receive http calls and an action which can send http calls
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
@@ -83,7 +84,7 @@ Quick summary:
 * Install [dotnet](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-install-script)
 * Setup [tapio CloudConnector](https://developer.tapio.one/docs/CloudConnector/CloudConnectorCore.html)
 * Setup [remote debugging with VS Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx)
-* Setup the PIR sensor and the RGG LED using the GPIO interface and a library like [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and deploy an OPC UA server which monitors the motion sensor and controls the RGB LED.
+* Setup the PIR sensor and the RGB LED using the GPIO interface and a library like [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and deploy an OPC UA server which monitors the motion sensor and controls the RGB LED.
 
 ### Building the connector
 
