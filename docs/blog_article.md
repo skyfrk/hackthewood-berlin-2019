@@ -38,9 +38,9 @@ Finally one can combine a trigger with an action from any service, which is then
 
 ## The implementation
 
-Integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) would've been a project on its own and required access to tapio internal structures.
+On the first day of the hackathon we used the available time to create an implementation plan broken down to small tasks. The remaining time until the presentation session on the fourth day, where all teams showcased their prototypes, consisted of coding, reading documentation and scratching our heads.
 
-Therefore we used an IFTTT-Service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what exactly a Webhook is but it's generally accepted to think of a Webhook as an endpoint for a HTTP call which when called triggers something. If you're familiar with programming you could also think of a Webhook as being a call to a function over the internet. The IFTTT Webhook service provides a trigger which can receive HTTP calls and an action which can send HTTP calls. Therefore it can be used as an interface to inject and receive any kinds of events.
+As integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) would've been a project on its own and required access to tapio internal structures we used an IFTTT-Service called [Webhooks](https://ifttt.com/maker_webhooks) instead. There is no official specification on what exactly a Webhook is but it's generally accepted to think of a Webhook as an endpoint for a HTTP call which when called triggers something. If you're familiar with programming you could also think of a Webhook as being a call to a function over the internet. The IFTTT Webhook service provides a trigger which can receive HTTP calls and an action which can send HTTP calls. Therefore it can be used as an interface to inject and receive any kinds of events.
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
