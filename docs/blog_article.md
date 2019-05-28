@@ -35,3 +35,24 @@ On the contrary an IFTTT-Action can be used to invoke something in its origin se
 Finally one can combine a trigger with an action from any service, which is then called an IFTTT-Applet. Applets can be shared and discovered on [IFTTT.com](http://www.ifttt.com/discover) in the discover section. An excerpt:
 
 ![applet-example-2.png](assets/applet-example-2.png)
+
+## The implementation
+
+Integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) would've been a project on its own and required access to tapio internal structures.
+
+Therefore we used an IFTTT-Service called [Webhooks](https://ifttt.com/maker_webhooks). There is no official specification on what exactly a Webhook is but it's generally accepted to think of a Webhook as an endpoint for a HTTP call which when called triggers something. If you're familiar with programming you could also think of a Webhook as being a call to a function over the internet. The IFTTT Webhook service provides a trigger which can receive HTTP calls and an action which can send HTTP calls. Therefore it can be used as an interface to inject and receive any kinds of events.
+
+![ifttt-webhook-service](assets/ifttt-webhook-service.png)
+
+So there were two event flows we had to implement: From tapio-ready machines to IFTTT and back.
+
+### Building a demo machine
+
+In order to test the tapio-IFTTT-Connector as we were developing it and also to showcase our accomplishments later on we needed a test machine which
+
+* can run the tapio CloudConnector,
+* can run a OPC UA server,
+* has an input so that we can trigger events
+* and has an output so that it can process actions.
+
+The first idea that came to mind was to use a [Raspberry Pi](https://www.raspberrypi.org/). It's cheap, reliable and easy to set up. It also provides a GPIO-interface which can be used to connect any input or output component like a motion sensor as input and a RGB LED as output.
