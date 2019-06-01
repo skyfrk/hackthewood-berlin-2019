@@ -9,7 +9,7 @@ The challenge I was responsible for - connecting the digital worlds - consisted 
 IFTTT or "**IF T**his **T**hen **T**hat" is an Internet of Things and automation platform which can be used by anyone even without technical knowledge. As the name suggests it's all about very simple automations which you can click together in their website or mobile app like:
 
 * **IF** I like a music video on YouTube **THEN** add it to my Spotify library.
-* **IF** my vacuum cleaner is stuck somewhere **THEN** send me a push notification to my smartphone.
+* **IF** my vacuum cleaner robot is stuck somewhere **THEN** send me a push notification to my smartphone.
 
 If the tapio ecosystem was connected with IFTTT a carpenter could setup individual automations on his own like:
 
