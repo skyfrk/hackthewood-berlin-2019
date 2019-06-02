@@ -16,35 +16,35 @@ Wenn das tapio-Ökosystem mit IFTTT verbunden wäre, könnte ein Schreiner selbs
 * **Wenn** meine CNC Maschine einen Alarm ausgelöst hat, **dann** lasse die Beleuchtung um die Maschine herum rot pulsieren, dass ein Mitarbeiter auf den Alarm aufmerksam wird und sich darum kümmert.
 * **Wenn** ich Amazon Alexa damit beauftrage meine Kantenmaschine anzuschalten, **dann** startet meine Kantenmaschine.
 
-### How does IFTTT work?
+### Wie funktioniert IFTTT?
 
-At IFTTT things are simple, which is great because it enables everyone to use the platform.
+Bei IFTTT sind die Dinge sehr einfach gehalten, was bedeutet, dass jeder dazu in der Lage ist die Plattform zu benutzen.
 
-An IFTTT-Service can be any kind of digital platform like YouTube, iRobot, Wordpress or tapio. However after a successful integration into IFTTT every service only consists of a brand, triggers and actions anymore.
+Ein IFTTT-Service kann jede Art von digitaler Plattform wie YouTube, iRobot, Wordpress oder tapio sein. Nach einer erfolgreichen Integration in IFTTT besteht jeder Service jedoch nur noch aus einer Marke, Triggern und Aktionen.
 
-An IFTTT-Trigger can be used to listen for an event to occur in its origin service. For example the BMW Labs service provides among others following trigger:
+Ein IFTTT-Trigger kann verwendet werden, um benachrichtigt zu werden, wenn ein Ereignis in seinem Ursprungsdienst eintritt. So bietet beispielsweise der BMW Labs Service unter anderem folgende Trigger an:
 
 ![trigger-example](assets/trigger-example.png)
 
-As you can see a trigger has a name, a description and an amount of properties which can be transmitted to given service.
+Wie zu sehen ist, hat ein Trigger einen Namen, eine Beschreibung und eine Anzahl von Eigenschaften, welche an einen bestimmten Dienst übertragen werden können.
 
-On the contrary an IFTTT-Action can be used to invoke something in its origin service. Actions are built with the same pattern as triggers like another example from the BMW Labs service:
+Eine IFTTT-Aktion kann hingegen verwendet werden, um etwas in ihrem Ursprungsdienst aufzurufen. Aktionen werden nach dem gleichen Muster wie Trigger erstellt, wie ein weiteres Beispiel aus dem BMW Labs Service zeigt:
 
 ![action-example](assets/action-example.png)
 
-Finally one can combine a trigger with an action from any service, which is then called an IFTTT-Applet. Applets can be shared and discovered on [IFTTT.com](http://www.ifttt.com/discover) in the discover section. An excerpt:
+Schließlich kann man einen Trigger mit einer Aktion aus einem beliebigen Dienst kombinieren, was dann als IFTTT-Applet bezeichnet wird. Applets können auf [IFTTT.com](http://www.ifttt.com/discover) mit anderen geteilt werden. Ein Auszug:
 
-![applet-example-2.png](assets/applet-example-2.png)
+![applet-example-2](assets/applet-example-2.png)
 
-## The implementation
+## Die Implementierung
 
-On the first day of the hackathon we used the available time to create an implementation plan broken down to small tasks. The remaining time until the presentation session on the fourth day, where all teams showcased their prototypes, consisted of coding, reading documentation and scratching our heads.
+Am ersten Tag des Hackathons nutzten wir die Zeit, um einen Implementierungsplan, bestehend aus kleinen Aufgaben, zu erstellen. Die verbleibende Zeit bis zur Präsentation der Ergebnisse am vierten Tag, bei welcher alle Teams ihre Prototypen präsentierten, verbrachten wir mit Programmieren, dem Lesen von Dokumentationen und Kopfkratzen.
 
-As integrating tapio into IFTTT [the official way](https://platform.ifttt.com/docs) would've been a project on its own and required access to tapio internal structures we used an IFTTT-Service called [Webhooks](https://ifttt.com/maker_webhooks) instead. There is no official specification on what exactly a Webhook is but it's generally accepted to think of a Webhook as an endpoint for a HTTP call which when called triggers something. If you're familiar with programming you could also think of a Webhook as being a call to a function over the internet. The IFTTT Webhook service provides a trigger which can receive HTTP calls and an action which can send HTTP calls. Therefore it can be used as an interface to inject and receive any kinds of events.
+Da die [offizielle Integration](https://platform.ifttt.com/docs) von tapio in IFTTT ein eigenständiges Projekt gewesen wäre und den Zugang zu tapio-internen Strukturen erfordert hätte, haben wir stattdessen einen IFTTT-Service namens [Webhooks](https://ifttt.com/maker_webhooks) genutzt. Es gibt keine offizielle Spezifikation zu Webhooks. Allgemein kann ein Webhook als Endpunkt für einen HTTP-Aufruf betrachtet werden, welcher beim Aufruf eine Aktion anstößt. Der Webhooks IFTTT-Service bietet einen IFTTT-Trigger, welcher HTTP-Aufrufe empfangen kann, und eine IFTTT-Aktion, welche HTTP-Aufrufe senden kann. So kann der IFTTT-Service als Schnittstelle zum Einspeisen oder Empfangen von Ereignissen jeglicher Art verwendet werden.
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
-So there were two event flows we had to implement: From tapio-ready machines to IFTTT and back.
+Es gab also zwei Ereignisabläufe, welche wir implementieren mussten: Von tapio-ready Maschinen bis zu IFTTT und zurück.
 
 ### Building a demo machine
 
