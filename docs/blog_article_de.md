@@ -46,51 +46,56 @@ Da die [offizielle Integration](https://platform.ifttt.com/docs) von tapio in IF
 
 Es gab also zwei Ereignisabläufe, welche wir implementieren mussten: Von tapio-ready Maschinen bis zu IFTTT und zurück.
 
-### Building a demo machine
+### Die Testmaschine
 
-In order to test the tapio-IFTTT-Connector as we were developing it and also to showcase our accomplishments later on we needed a test machine which
+Um den tapio-IFTTT-Connector während der Entwicklung auch testen und später unsere Ergebnisse präsentieren zu können, benötigten wir eine Testmaschine, welche
 
-* could run the tapio CloudConnector,
-* could run a OPC UA server,
-* has an input so that we could trigger events
-* and has an output so that it could process actions.
+* den tapio CloudConnector installiert hat,
+* dazu in der Lage ist eine OPC UA Server Instanz auszuführen,
+* einen Input hat, sodass wir Ereignisse auslösen können,
+* und einen Output hat, damit wir das Empfangen eines Events darstellen können.
 
 The tapio CloudConnector is the piece of software from tapio which has to be installed on a machine so that it can connect to the tapio ecosystem. CloudConnector can speak a machine to machine communication protocol called [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) which we can use to hook up input and output components with CloudConnector.
 
-The first idea that came to mind was to use a [Raspberry Pi](https://www.raspberrypi.org/). It's cheap, reliable and easy to set up. It also provides a GPIO-interface which can be used to connect any input or output component like a motion sensor as input and a RGB LED as output.
+Der tapio CloudConnector ist die Software von tapio, welche auf einer Maschine installiert werden muss, damit sie sich mit dem tapio-Ökosystem verbinden kann. Der CloudConnector unterstützt ein Maschine-zu-Maschine-Kommunikationsprotokoll namens [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/), mit dem wir die Input- und Outputkomponenten der Testmaschine mit dem CloudConnector verbinden können.
 
-So we went ahead, got ourself a Pi, installed [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) and set up SSH access. Then we took a look at the [tapio developer portal](https://developer.tapio.one) to figure out how to install the tapio CloudConnector linux. When the CloudConnector was running on the Pi we then continued with setting up [remote debugging with Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx). This way the implementation of the sensor-connecting OPC UA server was a lot easier. To access the GPIO pins we used the NuGet packages [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). The latter even offered the possibility to provide a custom event handler for GPIO pin status changes which simplified listening for events by a bit.
+Die erste Idee, die uns in den Sinn kam, war ein [Raspberry Pi](https://www.raspberrypi.org/) zu verwenden. Es ist preiswert, zuverlässig und einfach einzurichten. Es bietet auch eine GPIO-Schnittstelle, über die jede beliebige Input- und Outputkomponenten wie z.B. ein Bewegungsmelder als Eingang und eine RGB-LED als Ausgang angeschlossen werden kann.
 
-### Building the connector
+Also organisierten wir uns ein Pi, installierten das Betriebssystem [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) und richteten einen SSH Zugang ein. Dann besuchten wir das [tapio Developer Portal](https://developer.tapio.one) um herauszufinden, wie der CloudConnector unter Linux installiert wird. Als der CloudConnector auf dem Pi schließlich lief, richteten wir noch [Remote Debugging mit Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx) ein.
+So war die Implementierung der Software, welche die Input- und Outputkomponenten mit dem OPC UA Server verband, wesentlich einfacher.
+Um auf die GPIO Pins zuzugreifen benutzen wir die NuGet Pakete [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) und [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). Letzteres bot sogar die Möglichkeit, einen benutzerdefinierten Event-Handler für GPIO-Pin-Statusänderungen bereitzustellen, was den Umgang mit Sensor-Ereignissen um einiges vereinfachte.
 
-As there were two routes for events we focused on one at a time. First we took a look at the path events take when they're coming from IFTTT:
+### Der Connector
 
-1. An IFTTT-Applet was triggered which sent a HTTP request through the Webhook action to our connector.
-2. The connector received a HTTP request from IFTTT.
-3. The connector forwards the event via the tapio commanding API to the corresponding CloudConnector instance.
-4. CloudConnector received the commanding request and forwarded it as a call to the preconfigured OPC UA server.
-5. The OPC UA server processed the event.
+Von den zwei Routen für Ereignisse haben wir uns zuerst auf die Route von IFTTT zur Maschine fokussiert:
 
-The tapio commanding API is normally used to alter items or call methods on a OPC UA server associated with the CloudConnector but we figured we can use a item write request to transmit an event. On OPC UA server side we then just had to wait for item state changes and interpret them as events. In detail we used an `DataVariableState` of type `String` and used the value to transmit a serialized JSON object.
-When we noticed that our connector only had to listen for a http request and then make another http request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) approach using an [Azure Function](https://docs.microsoft.com/en-us/azure/azure-functions/) to save time (A Azure Function basically is a piece of code which gets executed when a certain condition arises).
+1. Ein IFTTT-Applet wird ausgelöst, welches dann über den Webhook IFTTT-Service den Connector aufruft.
+2. Der Connector leitet das Ereignis über die tapio Commanding-API an die entsprechende CloudConnector Instanz weiter.
+3. Der CloudConnector leitet das Ereignis an den vorkonfigurierten OPC UA Server weiter.
+4. Der speziell angepasste OPC UA Server verarbeitet das Ereignis.
+
+
+Die tapio Commanding-API wird normalerweise dazu verwendet, Werte von Knoten auf einem OPC UA Server zu ändern oder OPC UA Methoden aufzurufen. Wir nutzen die Eigenschaft der Commanding-API Werte von Knoten zu ändern um immer dann einen Wert zu ändern, wenn ein Ereignis übertragen werden sollte. Serverseitig mussten wir dann lediglich den Zustand eines Knoten überwachen und bei Änderung die übertragenen Daten als Ereignisdaten interpretieren. Im Detail benutzen wir einen `DataVariableState` vom Typ `String` und benutzen den Wert des Knoten um ein serialisiertes JSON Object zu übertragen. Als wir feststellten, dass der Connector lediglich auf eine HTTP-Anfrage wartet und selbst eine HTTP-Anfrage stellt, entschieden wir uns für einen [Server-losen](https://martinfowler.com/articles/serverless.html) Ansatz mit einer [Azure Function](https://docs.microsoft.com/en-us/azure/azure-functions/), um Zeit zu sparen (Eine Azure Function ist im Grunde genommen ein Stück Code, welcher ausgeführt wird, wenn eine bestimmte Bedingung eintritt).
 
 For testing our function the command-line program [ngrok](https://ngrok.com/) came in handy. Through ngrok you can expose a local development server to the internet. This way you can debug webhooks directly on your local machine without exposing ports or renting a webserver.
 
-After the first event flow worked we started working on the second:
+Zum Testen unserer Azure Function kam uns das Befehlszeilenprogramm [ngrok](https://ngrok.com/) gelegen. Mit ngrok kann ein lokaler Entwicklungsserver dem Internet zugänglich gemacht werden. Auf diese Weise können Webhooks debuggt werden, ohne manuell Ports freizuschalten oder einen extra Webserver zu mieten.
 
-1. A sensor of a machine changed its state.
-2. The state change was forwarded to the machines OPC UA server.
-3. The OPC UA server invoked a OPC UA event.
-4. The CloudConnector forwarded the event to the tapio core.
-5. The tapio core forwarded the event to a custom EventHub (preconfigured for given tapio machine id).
-6. The connector received a new event in the EventHub.
-7. The connector forwarded the event via webhook to IFTTT.
-8. An IFTTT-Applet triggered an action from any service.
+Nachdem der erste Ereignisablauf einmal erfolgreich durchlief, begannen wir mit der Arbeit am zweiten:
 
-An [Azure EventHub](https://azure.microsoft.com/en-us/services/event-hubs/) can listen for many events at the same time and provide a queue which event consumers can work through to process all events. We set up an EventHub instance in Azure and connected it through [my tapio](https://admin.tapio.one/) with our machine. Then we set up another Azure Function which consumed events from given EventHub and forwarded them to IFTTT through the webhook service.
+1. Ein Sensor einer Maschine hat seinen Zustand geändert.
+2. Die Zustandsänderung wird an den OPC UA Server der Maschine weitergeleitet.
+3. Der OPC UA Server löst ein OPC UA Ereignis aus.
+4. Der CloudConnector leitet das Ereignis an den tapio Core weiter.
+5. Der tapio Core leitete das Ereignis an einen benutzerdefinierten EventHub weiter (vorkonfiguriert für die tapio-Maschinen-ID).
+6. Der Connector bekommt eine neue Nachricht vom EventHub.
+7. Der Connector interpretiert die Nachricht als Ereignis und leitet dieses an IFTTT über den Webhook-Service weiter.
+8. In IFTTT empfängt ein IFTTT-Applet das Ereignis und leitet es entsprechend seiner Konfiguration an einen beliebigen Dienst in IFTTT weiter.
 
-## Conclusion
+Ein [Azure EventHub](https://azure.microsoft.com/en-us/services/event-hubs/) kann viele Ereignisse gleichzeitig verarbeiten und stellt eine Warteschlange bereit, über welche die einzelnen Ereignisse von verschiedenen Konsumenten nacheinander verarbeitet werden können. Wir haben eine EventHub-Instanz in Azure eingerichtet und diese über [my tapio](https://admin.tapio.one/) mit unserer Testmaschine verbunden. Dann haben wir eine weitere Azure Function eingerichtet, welche Nachrichten aus dem EventHub ausliest, diese als Ereignisse interpretiert und über den Webhook-Service an IFTTT weiterleitet.
 
-That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we're able to present a functioning prototype. For our demo on day four we logged motion sensor data through our connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis for example are tasks still to be done.
+## Fazit
 
-Aside from resolving the actual challenges the hackathon was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together! :)
+Das war 's! Zwei Azure Functions, ein EventHub, ein Raspberry Pi und drei Werktage später konnten wir einen funktionierenden Prototyp präsentieren. Für unsere Demo am vierten Tag haben wir die Daten eines Bewegungssensors an unserer Testmaschine über den tapio-IFTTT-Connector in eine Google Drive Tabelle protokolliert, eine RGB-LED mit einem Widget auf einem Smartphone eingeschaltet und ein neues IFTTT-Applet live konfiguriert. Wir haben kein fertiges Produkt entwickelt, aber einen funktionierenden Machbarkeitsnachweis geliefert, welcher in ein richtiges Produkt weiterentwickelt werden könnte. Eine Form der Authentifizierung, Autorisierung und eine Weboberfläche zur Konfiguration von maschinenbezogenen Ereignissen stehen z.B. noch aus.
+
+Neben der Bearbeitung der Herausforderungen war der Hackathon aber vor allem eine lustige Veranstaltung mit motivierten Teilnehmern, welche sich jederzeit gegenseitig ausgeholfen haben und gemeinsam eine spannende Woche in Berlin erlebt haben! :)
