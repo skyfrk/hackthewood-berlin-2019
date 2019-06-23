@@ -1,6 +1,10 @@
-# Connecting the digital worlds
+# Connecting the digital worlds (1/3)
 
-Hallo Welt! Als dualer HOMAG-Student nutzte ich die Gelegenheit, die HOMAG Digital Factory bei [#hackthewood2019](http://www.hackthewood.com) in Berlin zu vertreten. In diesem Artikel möchte ich zeigen, wie wir dort eine Idee in weniger als vier Tagen in einen funktionierenden Prototyp umgesetzt haben.
+Hallo Welt! Als dualer HOMAG-Student nutzte ich die Gelegenheit, die HOMAG Digital Factory bei [#hackthewood2019](http://www.hackthewood.com) in Berlin zu vertreten. In dieser Artikelserie möchte ich in drei Schritten zeigen, wie wir dort eine Idee in weniger als vier Tagen in einen funktionierenden Prototyp umgesetzt haben:
+
+* [Connecting the digital worlds (1/3)](http://www.linktoarticle.com)
+* [Connecting the digital worlds (2/3)](http://www.linktoarticle.com)
+* [Connecting the digital worlds (3/3)](http://www.linktoarticle.com)
 
 ## Die Idee
 
@@ -63,5 +67,8 @@ Der tapio CloudConnector ist die Software von tapio, welche auf einer Maschine i
 
 Die erste Idee, die uns in den Sinn kam, war ein [Raspberry Pi](https://www.raspberrypi.org/) zu verwenden. Es ist preiswert, zuverlässig und einfach einzurichten. Es bietet außerdem eine GPIO-Schnittstelle, über die jede beliebige Input- und Outputkomponente wie z.B. ein Bewegungsmelder als Input und eine RGB-LED als Output angeschlossen werden kann.
 
-Also organisierten wir uns ein Pi, installierten das Betriebssystem [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) und richteten einen SSH Zugang ein. Dann besuchten wir das [tapio Developer Portal](https://developer.tapio.one) um herauszufinden, wie der CloudConnector unter Linux installiert wird. Als der CloudConnector auf dem Pi schließlich lief, richteten wir uns noch [Remote Debugging mit Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx) ein. So war die Implementierung der Software, welche die Input- und Outputkomponenten mit dem OPC UA Server verband, wesentlich einfacher.
-Um auf die GPIO Pins zuzugreifen benutzen wir die NuGet Pakete [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) und [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). Letzteres bot sogar die Möglichkeit, einen benutzerdefinierten Event-Handler für GPIO-Pin-Statusänderungen bereitzustellen, was den Umgang mit Sensor-Ereignissen um einiges vereinfachte.
+Also organisierten wir uns ein Pi, installierten das Betriebssystem [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) und richteten einen SSH Zugang ein. Dann suchten wir das [tapio Developer Portal](https://developer.tapio.one) auf um herauszufinden, wie der CloudConnector unter Linux installiert wird. Als der CloudConnector auf dem Pi schließlich lief, richteten wir uns noch [Remote Debugging mit Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx) ein. So war die Implementierung der Software, welche die Input- und Outputkomponenten mit dem OPC UA Server verband, wesentlich einfacher.
+
+![Demo machine](assets/demo_machine.jpg)
+
+Mit der Inbetriebnahme unserer Testmaschine begannen wir mit der Implementierung des tapio-IFTTT-Connectors. Im nächsten Artikel dieser Serie werden wir uns mit der Implementierung der Route von Events von IFTTT zu tapio-ready Maschinen beschäftigen.
