@@ -71,4 +71,4 @@ Also organisierten wir uns ein Pi, installierten das Betriebssystem [Raspbian Li
 
 ![Demo machine](assets/demo_machine.jpg)
 
-Mit der Inbetriebnahme unserer Testmaschine begannen wir mit der Implementierung des tapio-IFTTT-Connectors. Im nächsten Artikel dieser Serie werden wir uns mit der Implementierung der Route von Events von IFTTT zu tapio-ready Maschinen beschäftigen.
+Mit der Inbetriebnahme unserer Testmaschine begannen wir mit der Implementierung des tapio-IFTTT-Connectors. Im [nächsten Artikel](https://www.linktonextarticle.com) dieser Serie werden wir uns mit der Implementierung der Route von Events von IFTTT zu tapio-ready Maschinen beschäftigen.

@@ -71,4 +71,4 @@ So we went ahead, got ourself a Pi, installed [Raspbian Lite](https://www.raspbe
 
 ![Demo machine](assets/demo_machine.jpg)
 
-With our demo machine up and running we started working on the implementation of the connector itself. Stay tuned for the next article in this series where we will share how we implemented the route for events from IFTTT to tapio-ready machines.
+With our demo machine up and running we started working on the implementation of the connector itself. Stay tuned for the [next article](https://www.linktonextarticle.com) in this series where we will share how we implemented the route for events from IFTTT to tapio-ready machines.
