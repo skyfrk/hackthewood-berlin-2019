@@ -233,7 +233,7 @@ public class Led : ILed
     {
         if(color < 0 || color > _MaxColorValue)
         {
-            throw new ArgumentException($"Color value ({color}) out of accepted range (0..255).", paramName);
+            throw new ArgumentException($"Color value ({color}) out of accepted range (0..{_MaxColorValue}).", paramName);
         }
     }
 }
