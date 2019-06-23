@@ -65,37 +65,3 @@ Die erste Idee, die uns in den Sinn kam, war ein [Raspberry Pi](https://www.rasp
 
 Also organisierten wir uns ein Pi, installierten das Betriebssystem [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) und richteten einen SSH Zugang ein. Dann besuchten wir das [tapio Developer Portal](https://developer.tapio.one) um herauszufinden, wie der CloudConnector unter Linux installiert wird. Als der CloudConnector auf dem Pi schließlich lief, richteten wir uns noch [Remote Debugging mit Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx) ein. So war die Implementierung der Software, welche die Input- und Outputkomponenten mit dem OPC UA Server verband, wesentlich einfacher.
 Um auf die GPIO Pins zuzugreifen benutzen wir die NuGet Pakete [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) und [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). Letzteres bot sogar die Möglichkeit, einen benutzerdefinierten Event-Handler für GPIO-Pin-Statusänderungen bereitzustellen, was den Umgang mit Sensor-Ereignissen um einiges vereinfachte.
-
-### Der Connector
-
-Von den zwei Routen für Ereignisse haben wir uns zuerst auf die Route von IFTTT zur Maschine fokussiert:
-
-1. Ein IFTTT-Applet wird ausgelöst, welches dann über den Webhook IFTTT-Service den Connector aufruft.
-2. Der Connector leitet das Ereignis über die tapio Commanding-API an die entsprechende CloudConnector Instanz weiter.
-3. Der CloudConnector leitet das Ereignis an den vorkonfigurierten OPC UA Server weiter.
-4. Der speziell angepasste OPC UA Server verarbeitet das Ereignis.
-
-
-Die tapio Commanding-API wird normalerweise dazu verwendet, Werte von Knoten auf einem OPC UA Server zu ändern oder OPC UA Methoden aufzurufen. Wir nutzen die Eigenschaft der Commanding-API Werte von Knoten zu ändern um immer dann einen Wert zu ändern, wenn ein Ereignis übertragen werden sollte. Serverseitig mussten wir dann lediglich den Zustand eines Knoten überwachen und bei Änderung die übertragenen Daten als Ereignisdaten interpretieren. Im Detail benutzen wir einen `DataVariableState` vom Typ `String` und benutzen den Wert des Knoten um ein serialisiertes JSON Object zu übertragen, welches Metadaten zu dem Ereignis mit sich führte. Als wir feststellten, dass der Connector lediglich auf eine HTTP-Anfrage wartet und selbst eine HTTP-Anfrage stellt, entschieden wir uns für einen [Server-losen](https://martinfowler.com/articles/serverless.html) Ansatz mit einer [Azure Function](https://docs.microsoft.com/en-us/azure/azure-functions/), um Zeit zu sparen (Eine Azure Function ist im Grunde genommen ein Stück Code, welcher ausgeführt wird, wenn eine bestimmte Bedingung eintritt).
-
-Zum Testen unserer Azure Function kam uns das Befehlszeilenprogramm [ngrok](https://ngrok.com/) gelegen. Mit ngrok kann ein lokaler Entwicklungsserver dem Internet zugänglich gemacht werden. Auf diese Weise können Webhooks debuggt werden, ohne manuell Ports freizuschalten oder einen extra Webserver zu mieten.
-
-Nachdem der erste Ereignisablauf einmal erfolgreich durchlief, begannen wir mit der Arbeit am zweiten:
-
-1. Ein Sensor einer Maschine hat seinen Zustand geändert.
-2. Die Zustandsänderung wird an den OPC UA Server der Maschine weitergeleitet.
-3. Der OPC UA Server löst ein OPC UA Ereignis aus.
-4. Der CloudConnector leitet das Ereignis an den tapio Core weiter.
-5. Der tapio Core leitete das Ereignis an einen benutzerdefinierten EventHub weiter (vorkonfiguriert für die tapio-Maschinen-ID).
-6. Der Connector bekommt eine neue Nachricht vom EventHub.
-7. Der Connector interpretiert die Nachricht als Ereignis und leitet dieses an IFTTT über den Webhook-Service weiter.
-8. In IFTTT empfängt ein IFTTT-Applet das Ereignis und leitet es entsprechend seiner Konfiguration an einen beliebigen Dienst in IFTTT weiter.
-
-Ein [Azure EventHub](https://azure.microsoft.com/en-us/services/event-hubs/) kann viele Ereignisse gleichzeitig verarbeiten und stellt eine Warteschlange bereit, über welche die einzelnen Ereignisse von verschiedenen Konsumenten nacheinander verarbeitet werden können.
-Wir haben eine EventHub-Instanz in Azure eingerichtet und diese über [my tapio](https://admin.tapio.one/) mit unserer Testmaschine verbunden. Dann haben wir eine weitere Azure Function eingerichtet, welche Nachrichten aus dem EventHub ausliest, diese als Ereignisse interpretiert und über den Webhook-Service an IFTTT weiterleitet.
-
-## Fazit
-
-Das war 's! Zwei Azure Functions, ein EventHub, ein Raspberry Pi, ein paar Sensoren und drei Werktage später konnten wir einen funktionsfähigen Prototyp präsentieren. Für unsere Demo am vierten Tag haben wir die Daten eines Bewegungssensors an unserer Testmaschine über den tapio-IFTTT-Connector in eine Google Drive Tabelle protokolliert, eine RGB-LED mit einem Widget auf einem Smartphone eingeschaltet und ein neues IFTTT-Applet live konfiguriert. Wir haben kein fertiges Produkt entwickelt, aber einen funktionierenden Machbarkeitsnachweis geliefert, welcher in ein richtiges Produkt weiterentwickelt werden kann. Eine Form der Authentifizierung, Autorisierung und eine Weboberfläche zur Konfiguration von maschinenbezogenen Ereignissen stünden beispielsweise noch aus.
-
-Neben der Bearbeitung der Herausforderungen war der Hackathon aber vor allem eine lustige Veranstaltung mit motivierten Teilnehmern, welche sich jederzeit gegenseitig ausgeholfen haben und gemeinsam eine spannende Woche in Berlin erlebt haben! :)
