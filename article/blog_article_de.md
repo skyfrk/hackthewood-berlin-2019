@@ -46,7 +46,9 @@ Es gibt keine offizielle Spezifikation zu Webhooks. Allgemein kann ein Webhook a
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
-Es gab also zwei Ereignisabläufe, welche wir implementieren mussten: Von tapio-ready Maschinen bis zu IFTTT und den Weg zurück.
+Es gab also zwei Ereignisabläufe, welche wir implementieren mussten: Von tapio-ready Maschinen bis zu IFTTT und den Weg zurück: 
+
+![Sequence diagram](assets/tapio-ifttt-sequence_v1.svg)
 
 ### Die Testmaschine
 

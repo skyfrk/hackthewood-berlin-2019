@@ -44,7 +44,9 @@ As integrating tapio into IFTTT [the official way](https://platform.ifttt.com/do
 
 ![ifttt-webhook-service](assets/ifttt-webhook-service.png)
 
-So there were two event flows we had to implement: From tapio-ready machines to IFTTT and back.
+So there were two event flows we had to implement: From tapio-ready machines to IFTTT and back: 
+
+![Sequence diagram](assets/tapio-ifttt-sequence_v1.svg)
 
 ### Building a demo machine
 
