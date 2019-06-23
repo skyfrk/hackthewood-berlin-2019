@@ -1,3 +1,121 @@
+# Connecting the digital worlds (3/3)
+
+![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.svg)
+
+```csharp
+public class MotionSensorMonitor : IMotionSensorMonitor
+{
+    private int _Pin;
+
+    public event EventHandler OnMotion;
+
+    public MotionSensorMonitor(int pinBoardNumber)
+    {
+        _Pin = pinBoardNumber;
+        var controller = new GpioController(PinNumberingScheme.Board);
+        controller.OpenPin(_Pin);
+        controller.SetPinMode(_Pin, PinMode.Input);
+        controller.RegisterCallbackForPinValueChangedEvent(_Pin, PinEventTypes.Rising, (sender, args) =>
+        {
+            OnMotion?.Invoke(this, new EventArgs());
+        });
+    }
+}
+```
+
+```csharp
+protected override void CreateAddressSpace()
+{
+    base.CreateAddressSpace();
+
+    _MotionSensorState = new DataVariableState<string>(false, "MotionSensorState", RootFolder, SystemContextObject);
+
+    AddNode(_MotionSensorState);
+}
+```
+
+```csharp
+public void OnMotionDetected()
+{
+    if(_MotionSensorState == null)
+    {
+        throw new InvalidOperationException("Please create the base event state first");
+    }
+    _MotionSensorState.StatusChanged("Motion detected", StatusCodes.Good);
+    Console.WriteLine("Reported motion sensor event.");
+}
+```
+
+```csharp
+static void Main(string[] args)
+{
+    var led = new Led(16, 20, 21);
+    var ledController = new LedController(led);
+    var motionSensorMonitor = new MotionSensorMonitor(10);
+    var nodeManager = new NodeManager(ledController, motionSensorMonitor);
+    var server = new Server(nodeManager);
+    motionSensorMonitor.OnMotion += nodeManager.OnMotionDetected;
+}
+```
+
+cc / tapio magic => event hub
+
+https://developer.tapio.one/docs/TapioDataCategories.html
+
+```json
+{
+  "tmid": "741ab3a2-040a-44bf-b8ce-4333d567a99a", // machine id
+  "msgid": "bf8610fa-a5e9-4ede-ad37-51082e7eb372", // message id
+  "msgt": "itd", // message type
+  "msgts": "2017-06-29T10:39:03.7651013+01:00", // ISO8601 timestamp 
+  "msg":  {
+    "p": "pi", // provider name
+    "k": "MotionSensorState", // key, usually the node id
+    "vt": "s", // data value type (string)
+    "v": "some data for IFTTT to play with :)",
+    "q": "g", // quality of the value (OPC UA thing)
+    "sts": "2017-06-29T10:38:43.7606016+01:00", // ISO8601 timestamp by OPC UA server
+    "rts": "2017-06-29T10:38:53.7606016+01:00" // ISO8601 timestamp by CloudConnector
+  }
+}
+```
+
+```csharp
+[FunctionName("EventHubProcessorFunction")]
+public static async void Run([IoTHubTrigger("ifttt", Connection = "EventHubConnection")]EventData message,
+ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context,
+CancellationToken cancellationToken)
+{
+    log.LogInformation($"C# IoT Hub trigger function processed a message: {Encoding.UTF8.GetString(message.Body.Array)}");
+
+    var eventHubMessage = JsonConvert.DeserializeObject<EventHubMessage>(Encoding.UTF8.GetString(message.Body.Array));
+    if(eventHubMessage.MessageType != "itd")
+    {
+        log.Log(LogLevel.Debug, $"Ignoring non-ItemData streaming data: {Encoding.UTF8.GetString(message.Body.Array)}");
+        return;
+    }
+
+    var tapioEvent = JsonConvert.DeserializeObject<TapioEvent>(JsonConvert.SerializeObject(eventHubMessage.Message));
+
+    if (tapioEvent.Provider != "pi")
+    {
+        log.Log(LogLevel.Debug, $"Ignoring non-event related data: {Encoding.UTF8.GetString(message.Body.Array)}");
+        return;
+    }
+
+    await SendEventToIFTTT(tapioEvent, log);
+
+    log.Log(LogLevel.Information, $"Action was sent successfully.");
+}
+```
+
+
+
+
+
+
+
+
 After the first event flow worked we started working on the second:
 
 1. A sensor of a machine changed its state.

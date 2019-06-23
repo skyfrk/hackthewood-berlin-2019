@@ -104,6 +104,30 @@ public static class EventFactory
 }
 ```
 
+```xml
+<Module xsi:type="DataModuleConfig">
+      <Id>DataModule01</Id>
+      <Source>
+        <Servers>
+          <SourceBase xsi:type="SourceOpcUa">
+            <Id>SensorServer</Id>
+            <OpcServer>opc.tcp://localhost:420</OpcUaServer>
+            <Commanding>
+              <Commands>
+                  <Command xsi:type="CommandItemWrite">
+                    <Id>ProcessEvent</Id>
+                    <TapioMachineId>741ab3a2-040a-44bf-b8ce-4333d567a99a</TapioMachineId>
+                    <NodeId>ns=2;s=PiSensorServer.ProcessEventCommandState</NodeId>
+                  </Command>
+                </Commands>
+            </Commanding>
+            <Groups>
+          </SourceBase>
+        </Servers>
+      </Source>
+</Module>
+```
+
 ```csharp
 protected override void CreateAddressSpace()
 {
