@@ -4,7 +4,7 @@ previous article: idea, demo machine and implementation approach
 
 this article: implementation of the connector from ifttt to tapio
 
-![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.svg)
+![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
 we use webhook component
 

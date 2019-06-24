@@ -52,7 +52,7 @@ There is no official specification on what exactly a Webhook is but it's general
 
 So there were two event flows we had to implement: From tapio-ready machines to IFTTT and back: 
 
-![Sequence diagram](assets/tapio-ifttt-sequence_v1.svg)
+![Sequence diagram](assets/tapio-ifttt-sequence-complete.png)
 
 ### Building a demo machine
 
@@ -69,6 +69,6 @@ The first idea that came to mind was to use a [Raspberry Pi](https://www.raspber
 
 So we went ahead, got ourself a Pi, installed [Raspbian Lite](https://www.raspberrypi.org/downloads/raspbian/) and set up SSH access. Then we took a look at the [tapio developer portal](https://developer.tapio.one) to figure out how to install the tapio CloudConnector linux. When the CloudConnector was running on the Pi we then continued with setting up [remote debugging with Visual Studio Code](https://www.hanselman.com/blog/RemoteDebuggingWithVSCodeOnWindowsToARaspberryPiUsingNETCoreOnARM.aspx). This way the implementation of the sensor-connecting OPC UA server was a lot easier. 
 
-![Demo machine](assets/demo_machine.jpg)
+![Demo machine](assets/demo_machine.png)
 
 With our demo machine up and running we started working on the implementation of the connector itself. Stay tuned for the [next article](https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3) in this series where we will share how we implemented the route for events from IFTTT to tapio-ready machines.

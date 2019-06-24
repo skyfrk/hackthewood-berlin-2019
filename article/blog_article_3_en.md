@@ -5,7 +5,7 @@ this article: from machine to ifttt
 
 links to other articles
 
-![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.svg)
+![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.png)
 
 monitor motion sensor with ms lib
 
