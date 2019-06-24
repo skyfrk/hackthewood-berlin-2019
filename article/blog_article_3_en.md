@@ -126,8 +126,17 @@ CancellationToken cancellationToken)
 }
 ```
 
-TODO: add sample for request to ifttt to show off possible payloads
-(value1, value2, value3 in body)
+show off possible payloads and use cases
+
+POST https://maker.ifttt.com/trigger/**motiondetected**/with/key/3Ef9eYIfe3tZIA8dcYcLUrQ3kIfd99SiszvYXIfegaM
+
+```json
+{
+    "value1": "some string",
+    "value2": "some other string",
+    "value3": "and another string"
+}
+```
 
 TODO: remove white edges
 ![Receiving applet config](assets/receiving-applet-config.png)
