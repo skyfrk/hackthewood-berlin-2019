@@ -1,25 +1,37 @@
 # Connecting the digital worlds (2/3)
 
+previous article: idea, demo machine and implementation approach
 
-
-
-* configure applet
-* receive webhook call with ngrok to debug azure function locally
-* build azure function
-  * convert event
-  * call commanding api
-* process event on the opc ua server on the pi
+this article: implementation of the connector from ifttt to tapio
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.svg)
+
+we use webhook component
+
+we want to use a serverless approach to wait for calls to safe money
+
+azure function
+
+how to debug?
+
+ngrok! forward a local port to a ngrok link
+
+download ngrok
+
+gen authtoken for account
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok authtoken 73tnJLcq4jmjLirCbAopr_6xfRJJcYtcGOEFejCvRU9
 Authtoken saved to configuration file: C:\Users\Simon/.ngrok2/ngrok.yml   
 ```
 
+forward azure function running on localhost:1337 to the internet
+
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
+
+monitor the calls passed through the tunnel
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
@@ -41,7 +53,13 @@ HTTP Requests
 GET /WebhookProcessorFunction               200 OK
 ```
 
+there is also a web interface with more details
+
+configure a test applet to send calls with light_on body to ngrok tunnel for testing
+
 ![Applet config](assets/applet-config.png)
+
+on get or post request make a commanding api item write request with body from request transformed to event type
 
 ```csharp
 [FunctionName("WebhookProcessorFunction")]
@@ -55,7 +73,7 @@ public static async Task<IActionResult> Run(
 
     await CallCommandAsync(new Command
     {
-        CommandType = CommandTypeHelper.WriteItem.Value,
+        CommandType = "itemWrite",
         Id = "ProcessEvent",
         ServerId = Config["ServerId"],
         TapioMachineId = Config["TapioMachineId"], 
@@ -65,6 +83,8 @@ public static async Task<IActionResult> Run(
     return new OkObjectResult("The command was processed successfully");
 }
 ```
+
+Available events could be provided dynamically for simplicities sake on 3 event types
 
 ```csharp
 public static class EventFactory
@@ -104,6 +124,8 @@ public static class EventFactory
 }
 ```
 
+Add commanding command configuration to datamodule config of the tapio cloudconnector
+
 ```xml
 <Module xsi:type="DataModuleConfig">
       <Id>DataModule01</Id>
@@ -128,6 +150,8 @@ public static class EventFactory
 </Module>
 ```
 
+Create commanding command node on the opc ua server and add eventhandler for write events
+
 ```csharp
 protected override void CreateAddressSpace()
 {
@@ -139,6 +163,8 @@ protected override void CreateAddressSpace()
     AddNode(_ProcessEventCommandDataVariableState);
 }
 ```
+
+Event handler for write events. interpret events here. could also be dynamic
 
 ```csharp
 private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
@@ -178,6 +204,8 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
 }
 ```
 
+interfaces for leds
+
 ```csharp
 public interface ILedController
 {
@@ -191,6 +219,8 @@ public interface ILed
     void SetColor(int red, int green, int blue);
 }
 ```
+
+talk to leds connected to the gpio pins of the pi
 
 ```csharp
 public class Led : ILed
