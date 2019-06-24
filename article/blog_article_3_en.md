@@ -1,6 +1,13 @@
 # Connecting the digital worlds (3/3)
 
+previous article: event route from ifttt to tapio
+this article: from machine to ifttt
+
+links to other articles
+
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.svg)
+
+monitor motion sensor with ms lib
 
 ```csharp
 public class MotionSensorMonitor : IMotionSensorMonitor
@@ -23,6 +30,8 @@ public class MotionSensorMonitor : IMotionSensorMonitor
 }
 ```
 
+Add node to be monitored by cloudconnector
+
 ```csharp
 protected override void CreateAddressSpace()
 {
@@ -33,6 +42,8 @@ protected override void CreateAddressSpace()
     AddNode(_MotionSensorState);
 }
 ```
+
+add event handler to update the node on motion
 
 ```csharp
 public void OnMotionDetected()
@@ -46,6 +57,8 @@ public void OnMotionDetected()
 }
 ```
 
+create motion sensor monitor and add eventhandler to the montior
+
 ```csharp
 static void Main(string[] args)
 {
@@ -58,7 +71,7 @@ static void Main(string[] args)
 }
 ```
 
-cc / tapio magic => event hub
+tapio cc monitors the node we created for status changes and reports them to a user specified azure eventhub
 
 https://developer.tapio.one/docs/TapioDataCategories.html
 
@@ -79,6 +92,10 @@ https://developer.tapio.one/docs/TapioDataCategories.html
   }
 }
 ```
+
+Reads from eventhub and filters for messages from our pi
+
+forwards events via http post request to ifttt webhook component
 
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
@@ -109,12 +126,11 @@ CancellationToken cancellationToken)
 }
 ```
 
+TODO: add sample for request to ifttt to show off possible payloads
+(value1, value2, value3 in body)
 
-
-
-
-
-
+TODO: remove white edges
+![Receiving applet config](assets/receiving-applet-config.png)
 
 After the first event flow worked we started working on the second:
 
