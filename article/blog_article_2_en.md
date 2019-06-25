@@ -1,12 +1,14 @@
 # Connecting the digital worlds (2/3)
 
-previous article: idea, demo machine and implementation approach
+In the [previous article](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3) we clarified the idea of the challenge and set up a demo machine. In this article we take on the implementation of the first route of events in the tapio-IFTTT-Connector: From IFTTT to tapio-ready machines.
 
-this article: implementation of the connector from ifttt to tapio
+* [Connecting the digital worlds (1/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3)
+* [Connecting the digital worlds (2/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3)
+* [Connecting the digital worlds (3/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3)
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-we use webhook component
+As [previously specified](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3) we want to use the webhook component
 
 we want to use a serverless approach to wait for calls to safe money
 
