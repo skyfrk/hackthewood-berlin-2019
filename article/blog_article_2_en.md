@@ -155,7 +155,7 @@ protected override void CreateAddressSpace()
 
 In order to physically show that our demo machine has received an event we want to flash the LED attached to our demo machine in different ways. Therefore we have to implement an abstraction layer to control the LED connected through the GPIO interface of our demo machine.
 
-So we defined an interface for a LED to abstract the GPIO logic and created another interface for a LED controller which is additionally capable of processing light sequences:
+So we have to define an interface for a LED to abstract the GPIO logic and create another one for a LED controller which is additionally capable of processing light sequences:
 
 ```csharp
 public interface ILedController
@@ -171,7 +171,7 @@ public interface ILed
 }
 ```
 
-Then we implemented the LED interface using the [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) NuGet package:
+Now we have to implement the LED interface using the [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) NuGet package:
 
 ```csharp
 public class Led : ILed
@@ -220,7 +220,7 @@ public class Led : ILed
 }
 ```
 
-
+Now we're finally able to process events in our event handler by interpreting the new value of the node as event and acting differently based on the name of the event. This part would naturally be fully dynamic and the sequence processor would work in a proper version of the tapio-IFTTT-Connector which wasn't implemented in two days.
 
 ```csharp
 private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
@@ -234,20 +234,14 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
         switch (eventData?.Name)
         {
             case "light_on":
-                Console.WriteLine("Setting light on");
                 _LedController.SetColor(255, 255, 255);
-                Console.WriteLine("Setting light on done");
                 break;
             case "light_off":
-                Console.WriteLine("Setting light off");
                 _LedController.SetColor(0, 0, 0);
-                Console.WriteLine("Setting light off done");
                 break;
-            case "light_sequence":
-                Console.WriteLine("Starting led sequence");
-                _LedController.ProcessSequence(JsonConvert.DeserializeObject<LedSequence>(eventData?.Payload));
-                Console.WriteLine("led sequence done");
-                break;
+            // case "light_sequence":
+            //     _LedController.ProcessSequence(JsonConvert.DeserializeObject<LedSequence>(eventData?.Payload));
+            //     break;
             default:
                 Console.WriteLine("Could not detect event type. Ignoring event.");
                 break;
@@ -260,14 +254,7 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
 }
 ```
 
-
-
-The tapio commanding API is normally used to alter items or call methods on a OPC UA server associated with the CloudConnector but we figured we can use a item write request to transmit an event. On OPC UA server side we then just had to wait for item state changes and interpret them as events. In detail we used an `DataVariableState` of type `String` and used the value to transmit a serialized JSON object, which contained metadata about the event.
-When we noticed that our connector only had to listen for a http request and then make another http request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) approach using an [Azure Function](https://docs.microsoft.com/en-us/azure/azure-functions/) to save time (A Azure Function basically is a piece of code which gets executed when a certain condition arises).
-
-For testing our function the command-line program [ngrok](https://ngrok.com/) came in handy. Through ngrok you can expose a local development server to the internet. This way you can debug webhooks directly on your local machine without exposing ports or renting a webserver.
-
-To access the GPIO pins we used the NuGet packages [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). The latter even offered the possibility to provide a custom event handler for GPIO pin status changes which simplified listening for events by a bit.
+We're done! We're now able to process events coming from IFTTT using just one Azure Function and a OPC UA server. In the [next article][article_3] in this series we're looking at the implementation of the reversed route: Forwarding a event from a tapio-ready machine to IFTTT.
 
 [article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
