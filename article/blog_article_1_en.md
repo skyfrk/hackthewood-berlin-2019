@@ -2,9 +2,9 @@
 
 Hello world! As a dual student at HOMAG I took my chance to represent the HOMAG Digital Factory at [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) in Berlin. In this article series I want to show in three steps how we built an idea into a working prototype in less than four days:
 
-* [Connecting the digital worlds (1/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3)
-* [Connecting the digital worlds (2/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3)
-* [Connecting the digital worlds (3/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3)
+* [Connecting the digital worlds (1/3)][article_1]
+* [Connecting the digital worlds (2/3)][article_2]
+* [Connecting the digital worlds (3/3)][article_3]
 
 ## The idea
 
@@ -71,4 +71,8 @@ So we went ahead, got ourself a Pi, installed [Raspbian Lite](https://www.raspbe
 
 ![Demo machine](assets/demo_machine.png)
 
-With our demo machine up and running we started working on the implementation of the connector itself. Stay tuned for the [next article](https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3) in this series where we will share how we implemented the route for events from IFTTT to tapio-ready machines.
+With our demo machine up and running we started working on the implementation of the connector itself. Stay tuned for the [next article][article_1] in this series where we will share how we implemented the route for events from IFTTT to tapio-ready machines.
+
+[article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
+[article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
+[article_3]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3

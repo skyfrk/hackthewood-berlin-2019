@@ -1,14 +1,14 @@
 # Connecting the digital worlds (2/3)
 
-In the [previous article](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3) we clarified the idea of the challenge and set up a demo machine. In this article we take on the implementation of the first route of events in the tapio-IFTTT-Connector: From IFTTT to tapio-ready machines.
+In the [previous article][article_1] we clarified the idea of the challenge and set up a demo machine. In this article we take on the implementation of the first route of events in the tapio-IFTTT-Connector: From IFTTT to tapio-ready machines.
 
-* [Connecting the digital worlds (1/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3)
-* [Connecting the digital worlds (2/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3)
-* [Connecting the digital worlds (3/3)](https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3)
+* [Connecting the digital worlds (1/3)][article_1]
+* [Connecting the digital worlds (2/3)][article_2]
+* [Connecting the digital worlds (3/3)][article_3]
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-As [previously specified](https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3) we want to use the webhook component
+As [previously specified][article_1] we want to use the webhook component
 
 we want to use a serverless approach to wait for calls to safe money
 
@@ -279,3 +279,7 @@ When we noticed that our connector only had to listen for a http request and the
 For testing our function the command-line program [ngrok](https://ngrok.com/) came in handy. Through ngrok you can expose a local development server to the internet. This way you can debug webhooks directly on your local machine without exposing ports or renting a webserver.
 
 To access the GPIO pins we used the NuGet packages [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) and [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio). The latter even offered the possibility to provide a custom event handler for GPIO pin status changes which simplified listening for events by a bit.
+
+[article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
+[article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
+[article_3]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3
