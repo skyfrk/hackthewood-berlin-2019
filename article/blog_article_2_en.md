@@ -8,7 +8,7 @@ In the [previous article][article_1] we clarified the idea of the challenge and 
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-As [previously specified][article_1] we want to use the IFTTT Webhook service so that when an applet using the Webhook service is triggered we will receive a HTTP request at the endpoint specified in the applet. We then want to process the request and forward the event to the machine using tapios Commanding API. The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
+As [previously specified][article_1] we want to use the IFTTT Webhook service so that when an applet using the Webhook service is triggered we will receive a HTTP request at the endpoint specified in the applet. We then want to process the request and forward the event to the machine using [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html). The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
 
 When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach. As you can tell by its name there are no servers in a serverless architecture but rather snippets of code which execute on certain conditions. Of course these snippets still run on a server but not on our servers. This way we can safe money because we don't have to operate or rent a server 24/7 and in addition we don't have to worry about setting up a server, installing a runtime environment etc. There are multiple products available for implementing serverless architectures. We picked Azure Functions from Microsofts cloud platform Azure.
 
@@ -137,8 +137,9 @@ In the example below we extend the configuration of `DataModule01` with our OPC 
 ...
 ```
 
+Now we're almost good to go. Events will now be forwarded to the OPC UA server running on our demo machine. But this server still lacks the configured node and the logic behind it.
 
-Create commanding command node on the opc ua server and add eventhandler for write events
+So lets add a `DataVariableState` node of type `String` to the address space of our OPC UA server. To also be able to process incoming events we have to be able to react to every single status change. We implemented that by attaching a custom event handler to the `WriteCalled` event of our node:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -152,47 +153,9 @@ protected override void CreateAddressSpace()
 }
 ```
 
-Event handler for write events. interpret events here. could also be dynamic
+In order to physically show that our demo machine has received an event we want to flash the LED attached to our demo machine in different ways. Therefore we have to implement an abstraction layer to control the LED connected through the GPIO interface of our demo machine.
 
-```csharp
-private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
-{
-    Console.WriteLine($"Command received with arg: {e?.Value}");
-
-    var eventData = JsonConvert.DeserializeObject<Event>(e.Value.ToString());
-    
-    try
-    {
-        switch (eventData?.Name)
-        {
-            case "light_on":
-                Console.WriteLine("Setting light on");
-                _LedController.SetColor(255, 255, 255);
-                Console.WriteLine("Setting light on done");
-                break;
-            case "light_off":
-                Console.WriteLine("Setting light off");
-                _LedController.SetColor(0, 0, 0);
-                Console.WriteLine("Setting light off done");
-                break;
-            case "light_sequence":
-                Console.WriteLine("Starting led sequence");
-                _LedController.ProcessSequence(JsonConvert.DeserializeObject<LedSequence>(eventData?.Payload));
-                Console.WriteLine("led sequence done");
-                break;
-            default:
-                Console.WriteLine("Could not detect event type. Ignoring event.");
-                break;
-        }
-    }
-    catch (Exception)
-    {
-        Console.WriteLine("Processing event failed. Ignoring event.");
-    }
-}
-```
-
-interfaces for leds
+So we defined an interface for a LED to abstract the GPIO logic and created another interface for a LED controller which is additionally capable of processing light sequences:
 
 ```csharp
 public interface ILedController
@@ -208,7 +171,7 @@ public interface ILed
 }
 ```
 
-talk to leds connected to the gpio pins of the pi
+Then we implemented the LED interface using the [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) NuGet package:
 
 ```csharp
 public class Led : ILed
@@ -253,6 +216,46 @@ public class Led : ILed
         {
             throw new ArgumentException($"Color value ({color}) out of accepted range (0..{_MaxColorValue}).", paramName);
         }
+    }
+}
+```
+
+
+
+```csharp
+private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
+{
+    Console.WriteLine($"Command received with arg: {e?.Value}");
+
+    var eventData = JsonConvert.DeserializeObject<Event>(e.Value.ToString());
+    
+    try
+    {
+        switch (eventData?.Name)
+        {
+            case "light_on":
+                Console.WriteLine("Setting light on");
+                _LedController.SetColor(255, 255, 255);
+                Console.WriteLine("Setting light on done");
+                break;
+            case "light_off":
+                Console.WriteLine("Setting light off");
+                _LedController.SetColor(0, 0, 0);
+                Console.WriteLine("Setting light off done");
+                break;
+            case "light_sequence":
+                Console.WriteLine("Starting led sequence");
+                _LedController.ProcessSequence(JsonConvert.DeserializeObject<LedSequence>(eventData?.Payload));
+                Console.WriteLine("led sequence done");
+                break;
+            default:
+                Console.WriteLine("Could not detect event type. Ignoring event.");
+                break;
+        }
+    }
+    catch (Exception)
+    {
+        Console.WriteLine("Processing event failed. Ignoring event.");
     }
 }
 ```
