@@ -29,7 +29,7 @@ Now you're already able to expose a local port. In the example below we're expos
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
 
-After running the above you're given a monitor screen in your terminal. Behind the `Forwarding` keyword you can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. You can verify if everything is working correctly by opening `http://qyt7q40w03.ngrok.io` in your web browser (sending a GET request). As you can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
+After running the above you're given a monitor screen in your terminal. Behind the `Forwarding` keyword you can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. You can verify if everything is working correctly by opening the ngrok  URL in your web browser (sending a GET request). As you can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
@@ -51,76 +51,57 @@ HTTP Requests
 GET /WebhookProcessorFunction               200 OK
 ```
 
-configure a test applet to send calls with light_on body to ngrok tunnel for testing
+To actually develop and debug with real HTTP requests from IFTTT we have to create an applet with a trigger under our control and an action which sends HTTP requests to our local Azure Function exposed through ngrok. Therefore we create an applet which sends a POST request into our ngrok tunnel when we press a button on our smartphone:
 
 ![Applet config](assets/applet-config.png)
 
-on get or post request make a commanding api item write request with body from request transformed to event type
+Because of our limited time frame to create everything we opted for a plain text body with a simple event name to lower complexity. Further down the line one could however transmit full blown JSON objects.
+
+Now for the good stuff: The implementation of the Azure Function. The code below basically waits for GET or POST requests, parses the body of the request, interprets it as event and then forwards it to the machine using the Commanding API.
 
 ```csharp
 [FunctionName("WebhookProcessorFunction")]
 public static async Task<IActionResult> Run(
-    [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-    ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context, CancellationToken cancellationToken)
+    [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext context, CancellationToken cancellationToken)
 {
-    log.LogInformation("C# HTTP trigger function processed a request.");
-
     var eventName = await new StreamReader(req.Body).ReadToEndAsync();
+    var processedEvent = JsonConvert.SerializeObject(EventFactory.Create(eventName));
 
     await CallCommandAsync(new Command
     {
         CommandType = "itemWrite",
         Id = "ProcessEvent",
         ServerId = Config["ServerId"],
-        TapioMachineId = Config["TapioMachineId"], 
-        Arguments = new Dictionary<string, CommandArgument> { { "value", new CommandArgument{ Value = JsonConvert.SerializeObject(EventFactory.Create(eventName)), ValueType = CommandArgumentTypeHelper.String.Value }}}
+        TapioMachineId = Config["TapioMachineId"],
+        Arguments = new Dictionary<string, CommandArgument>
+        {
+            { "value", new CommandArgument
+                {
+                 Value = processedEvent , ValueType = "String"
+                }
+            }
+        }
     }, cancellationToken);
 
     return new OkObjectResult("The command was processed successfully");
 }
 ```
 
-Available events could be provided dynamically for simplicities sake on 3 event types
+The `EventFactory` class is responsible for mapping event data from IFTTT to our generic event model:
 
 ```csharp
-public static class EventFactory
+public class Event
 {
-    public static Event Create(string eventName)
-    {
-        switch (eventName)
-        {
-            case "light_on":
-                return new Event { Name = eventName };
-            case "light_off":
-                return new Event { Name = eventName };
-            case "light_sequence1":
-                return new Event
-                {
-                    Name = eventName, Payload = JsonConvert.SerializeObject(new LedSequence
-                    {
-                        CycleCount = 25, LedSettings = new List<LedSetting>
-                        {
-                            new LedSetting
-                            {
-                                Duration = TimeSpan.FromSeconds(3), RGB = new RGB {Blue = 255, Green = 0, Red = 0}
-                            },
-                            new LedSetting
-                            {
-                                Duration = TimeSpan.FromSeconds(6), RGB = new RGB {Blue = 0, Green = 255, Red = 0}
-                            },
-                            new LedSetting
-                                {Duration = TimeSpan.FromSeconds(9), RGB = new RGB {Blue = 0, Green = 0, Red = 255}}
-                        }
-                    })
-                };
-        }
-
-        throw new Exception("Unknown event");
-    }
+    [JsonProperty("name")]
+    public string Name { get; set; }
+    [JsonProperty("payload")]
+    public string Payload { get; set; }
 }
 ```
 
-Add commanding command configuration to datamodule config of the tapio cloudconnector
+Due to time constraints we didn't finish the implementation of the support for events with payload. However being able to transmit any payload would for example enable an IFTTT user to transmit complex statements like [these :)](https://www.youtube.com/watch?v=lx_vWkv50uk) to his machine.
+
+The Commanding API is normally used to alter item values or call methods on a OPC UA server associated with the CloudConnector but we figured we can use an item write request as well to transmit an event. On OPC UA server side we then just have to wait for item state changes and interpret them as events. In detail we used an `DataVariableState` of type `String` and used the value to transmit a serialized JSON object, which contained metadata about the event.
 
 ```xml
 <Module xsi:type="DataModuleConfig">
@@ -145,6 +126,14 @@ Add commanding command configuration to datamodule config of the tapio cloudconn
       </Source>
 </Module>
 ```
+
+Available events could be provided dynamically for simplicities sake on 3 event types
+
+
+
+Add commanding command configuration to datamodule config of the tapio cloudconnector
+
+
 
 Create commanding command node on the opc ua server and add eventhandler for write events
 
