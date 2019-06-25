@@ -8,7 +8,12 @@ In the [previous article][article_1] we clarified the idea of the challenge and 
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-As [previously specified][article_1] we want to use the webhook component
+As [previously specified][article_1] we want to use the IFTTT Webhook service so that when an applet using the Webhook service is triggered we will receive a HTTP request at the endpoint specified in the applet.
+We then want to process the request and forward the event to the machine using tapios Commanding API.
+The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
+
+When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach.
+We decided to do so, because...
 
 we want to use a serverless approach to wait for calls to safe money
 
