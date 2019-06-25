@@ -59,6 +59,8 @@ Because of our limited time frame to create everything we opted for a plain text
 
 Now for the good stuff: The implementation of the Azure Function. The code below basically waits for GET or POST requests, parses the body of the request, interprets it as event and then forwards it to the machine using the Commanding API.
 
+The Commanding API is normally used to alter item values or call methods on a OPC UA server associated with the CloudConnector but we figured we can use an item write request as well to transmit an event. On OPC UA server side we then just have to wait for item state changes and interpret them as events.
+
 ```csharp
 [FunctionName("WebhookProcessorFunction")]
 public static async Task<IActionResult> Run(
@@ -101,38 +103,39 @@ public class Event
 
 Due to time constraints we didn't finish the implementation of the support for events with payload. However being able to transmit any payload would for example enable an IFTTT user to transmit complex statements like [these :)](https://www.youtube.com/watch?v=lx_vWkv50uk) to his machine.
 
-The Commanding API is normally used to alter item values or call methods on a OPC UA server associated with the CloudConnector but we figured we can use an item write request as well to transmit an event. On OPC UA server side we then just have to wait for item state changes and interpret them as events. In detail we used an `DataVariableState` of type `String` and used the value to transmit a serialized JSON object, which contained metadata about the event.
+If we tried to test our system at this point events wouldn't reach their target machine because we didn't modify the tapio CloudConnector XML configuration of the machine yet. By default  you can't access any OPC UA node through Commanding API for security reasons until you configure the access in the configuration file.
+
+In the example below we extend the configuration of `DataModule01` with our OPC UA event processor server `SensorServer` which has an item write command configured: `ProcessEvent`.
 
 ```xml
+...
 <Module xsi:type="DataModuleConfig">
       <Id>DataModule01</Id>
       <Source>
         <Servers>
+          ...
           <SourceBase xsi:type="SourceOpcUa">
             <Id>SensorServer</Id>
             <OpcServer>opc.tcp://localhost:420</OpcUaServer>
             <Commanding>
               <Commands>
+                  ...
                   <Command xsi:type="CommandItemWrite">
                     <Id>ProcessEvent</Id>
                     <TapioMachineId>741ab3a2-040a-44bf-b8ce-4333d567a99a</TapioMachineId>
                     <NodeId>ns=2;s=PiSensorServer.ProcessEventCommandState</NodeId>
                   </Command>
+                  ...
                 </Commands>
             </Commanding>
             <Groups>
           </SourceBase>
+          ...
         </Servers>
       </Source>
 </Module>
+...
 ```
-
-Available events could be provided dynamically for simplicities sake on 3 event types
-
-
-
-Add commanding command configuration to datamodule config of the tapio cloudconnector
-
 
 
 Create commanding command node on the opc ua server and add eventhandler for write events
