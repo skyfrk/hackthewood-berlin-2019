@@ -13,9 +13,9 @@ We then want to process the request and forward the event to the machine using t
 The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
 
 When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach.
-We decided to do so, because...
-
-we want to use a serverless approach to wait for calls to safe money
+As you can tell by its name there are no servers in a serverless architecture but rather snippets of code which execute on certain conditions.
+Of course these snippets still run on a server but not on our servers.
+This way we can safe money because we don't have to operate or rent a server 24/7 and in addition we don't have to worry about setting up a server, installing a runtime environment etc.
 
 azure function
 
