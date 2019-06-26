@@ -75,7 +75,18 @@ static void Main(string[] args)
 }
 ```
 
-Now we're able to reflect motions in front of our PIR to OPC UA node status changes and CloudConnector automatically forwards these to tapio. As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) streaming this data into a [Azure Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) we deployed us one through the [Azure Portal](http://portal.azure.com/) and configure an app in [my tapio](https://my.tapio.one/) to forward the data to our event hub.
+Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). You can see our configuration below:
+
+```xml
+...
+<SourceItem xsi:type="SourceDataItem">
+  <NodeId>ns=2;s=PiSensorServer.MotionSensorState</NodeId>
+  <SrcKey>MotionSensorState</SrcKey>
+</SourceItem>
+...
+```
+
+As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) streaming this data into an [Azure Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) we deployed us one through the [Azure Portal](http://portal.azure.com/) and configured an app in [my tapio](https://my.tapio.one/) to forward the data to our event hub.
 
 Data ingested into an Azure Event Hub can easily be processed, stored or served for third party apps. As we only want to process and forward events as they come in we opted for a serverless approach [again][article_2] with another Azure Function hooked up to our event hub.
 
@@ -100,6 +111,8 @@ Below you can see how an event message ingested into our event hub looks like:
 ```
 
 [Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) property. Every item data message has the type `itd`.
+
+Inside the `msg` property we can find the actual item data message.
 
 
 Reads from eventhub and filters for messages from our pi
