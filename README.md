@@ -1,7 +1,5 @@
 # HACK THE WOOD Berlin 2019
 
-## About
-
 [HACK THE WOOD](https://www.tapio.one/en/blog/hack-the-wood-2019) was [tapio's](https://www.tapio.one/) first public hackathon hosted by Microsoft in Berlin.
 
 There were five challenges:
