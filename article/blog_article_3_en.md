@@ -8,7 +8,7 @@ In the [previous article][article_2] we implemented the flow of events from IFTT
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.png)
 
-First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin on motion.
+First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin when there is motion in front of it.
 
 <!-- TODO insert wiring picture -->
 
@@ -114,6 +114,8 @@ Below you can see how an event message ingested into our event hub looks like:
 
 Inside the value of the `msg` key we can find the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
 
+Below you can see a simplified version of our event hub processor Azure Function:
+
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
 public static async void Run([IoTHubTrigger("ifttt", Connection = "EventHubConnection")]EventData message, Microsoft.Azure.WebJobs.ExecutionContext context,
@@ -135,28 +137,31 @@ CancellationToken cancellationToken)
 }
 ```
 
-show off possible payloads and use cases
+In similar fashion to our [other Azure Function][article_2] we're simply consuming messages from our event hub and then forward them to IFTTT. The `SendEventToIFTTT` method wraps a simple HTTP request towards the IFTTT Webhook service:
 
-POST https://maker.ifttt.com/trigger/**motiondetected**/with/key/3Ef9eYIfe3tZIA8dcYcLUrQ3kIfd99SiszvYXIfegaM
+POST `https://maker.ifttt.com/trigger/<name of the event>/with/key/<your accounts webhook service key>`
+
+The Webhook service key can be obtained [here](https://ifttt.com/maker_webhooks) (if you're logged in). The Webhook service is also able to interpret an `application/json` body if it has the structure below:
 
 ```json
 {
     "value1": "some string",
-    "value2": "some other string",
-    "value3": "and another string"
+    "value2": "#MWIGA",
+    "value3": "hello world"
 }
 ```
 
-TODO: remove white edges
+Taking advantage of the body structure one could transmit any kind of event data to IFTTT. Finally we have to configure an applet in IFTTT to test our implementation. We combined [Google Sheets](https://ifttt.com/services/google_sheets) with the Webhook service for example:
+
 ![Receiving applet config](assets/receiving-applet-config.png)
 
 ## Conclusion
 
 <!-- Insert Architecture diagram -->
 
-That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we're able to present a functioning prototype. For our demo on day four we logged motion sensor data through our connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis for example are tasks still to be done.
+That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we were able to present a functioning prototype. For our demo on day four we logged motion sensor data through our tapio-IFTTT-Connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis are mandatory for a feature complete solution. Our code base also lacks a huge refactoring... :D
 
-Aside from resolving the actual challenges the hackathon was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together! :)
+Aside from resolving the actual challenges [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together in Berlin!
 
 [article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
