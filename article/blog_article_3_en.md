@@ -57,7 +57,7 @@ public void OnMotionDetected()
     {
         throw new InvalidOperationException("Please create the base event state first");
     }
-    _MotionSensorState.StatusChanged("Motion detected", StatusCodes.Good);
+    _MotionSensorState.StatusChanged("motiondetected", StatusCodes.Good);
 }
 ```
 
@@ -75,7 +75,7 @@ static void Main(string[] args)
 }
 ```
 
-Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). You can see our configuration below:
+Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
 
 ```xml
 ...
@@ -102,7 +102,7 @@ Below you can see how an event message ingested into our event hub looks like:
     "p": "pi", // provider name
     "k": "MotionSensorState", // key, usually the node id
     "vt": "s", // data value type (string)
-    "v": "motion detected", // payload
+    "v": "motiondetected", // payload
     "q": "g", // quality of the value (OPC UA thing)
     "sts": "2017-06-29T10:38:43.7606016+01:00", // ISO8601 timestamp by OPC UA server
     "rts": "2017-06-29T10:38:53.7606016+01:00" // ISO8601 timestamp by CloudConnector
@@ -110,41 +110,28 @@ Below you can see how an event message ingested into our event hub looks like:
 }
 ```
 
-[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) property. Every item data message has the type `itd`.
+[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
 
-Inside the `msg` property we can find the actual item data message.
-
-
-Reads from eventhub and filters for messages from our pi
-
-forwards events via http post request to ifttt webhook component
+Inside the value of the `msg` key we can find the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
 
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
-public static async void Run([IoTHubTrigger("ifttt", Connection = "EventHubConnection")]EventData message,
-ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context,
+public static async void Run([IoTHubTrigger("ifttt", Connection = "EventHubConnection")]EventData message, Microsoft.Azure.WebJobs.ExecutionContext context,
 CancellationToken cancellationToken)
 {
-    log.LogInformation($"C# IoT Hub trigger function processed a message: {Encoding.UTF8.GetString(message.Body.Array)}");
-
-    var eventHubMessage = JsonConvert.DeserializeObject<EventHubMessage>(Encoding.UTF8.GetString(message.Body.Array));
-    if(eventHubMessage.MessageType != "itd")
+    var streamingDataMessage = JsonConvert.DeserializeObject<StreamingDataMessage>(Encoding.UTF8.GetString(message.Body.Array));
+    if(streamingDataMessage.MessageType != "itd")
     {
-        log.Log(LogLevel.Debug, $"Ignoring non-ItemData streaming data: {Encoding.UTF8.GetString(message.Body.Array)}");
         return;
     }
 
-    var tapioEvent = JsonConvert.DeserializeObject<TapioEvent>(JsonConvert.SerializeObject(eventHubMessage.Message));
-
-    if (tapioEvent.Provider != "pi")
+    var itemDataMessage = JsonConvert.DeserializeObject<ItemDataMessage>(streamingDataMessage.Message);
+    if (itemDataMessage.SrcKey != "MotionSensorState")
     {
-        log.Log(LogLevel.Debug, $"Ignoring non-event related data: {Encoding.UTF8.GetString(message.Body.Array)}");
         return;
     }
 
-    await SendEventToIFTTT(tapioEvent, log);
-
-    log.Log(LogLevel.Information, $"Action was sent successfully.");
+    await SendEventToIFTTT(itemDataMessage.Value);
 }
 ```
 
