@@ -1,13 +1,18 @@
 # Connecting the digital worlds (3/3)
 
-previous article: event route from ifttt to tapio
-this article: from machine to ifttt
+In the [previous article][article_2] we implemented the flow of events from IFTTT to tapio-ready machines. Now we want to implement forwarding events from tapio-ready machines to IFTTT.
 
-links to other articles
+* [Connecting the digital worlds (1/3)][article_1]
+* [Connecting the digital worlds (2/3)][article_2]
+* [Connecting the digital worlds (3/3)][article_3]
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.png)
 
-monitor motion sensor with ms lib
+First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin on motion.
+
+<!-- TODO insert wiring picture -->
+
+Now that our sensor is ready we have to monitor it for status changes in order to react to motion events. Microsofts GPIO library [System.Device.Gpio](https://github.com/dotnet/iot) provides a method `RegisterCallbackForPinValueChangedEvent` through which one can subscribe to rising or falling currents. Using this method we wrote a little wrapper to simplify things a bit:
 
 ```csharp
 public class MotionSensorMonitor : IMotionSensorMonitor
@@ -30,7 +35,7 @@ public class MotionSensorMonitor : IMotionSensorMonitor
 }
 ```
 
-Add node to be monitored by cloudconnector
+Now that we're able to react to status changes we want them reflected in the OPC UA server of our demo machine so that these changes can get forwarded to tapio through the CloudConnector also running on our demo machine. So we have to a add a node to our OPC UA servers address space:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -43,7 +48,7 @@ protected override void CreateAddressSpace()
 }
 ```
 
-add event handler to update the node on motion
+Then we have to add an event handler method to our node manager which updates our `MotionSensorState` node when called:
 
 ```csharp
 public void OnMotionDetected()
@@ -53,11 +58,10 @@ public void OnMotionDetected()
         throw new InvalidOperationException("Please create the base event state first");
     }
     _MotionSensorState.StatusChanged("Motion detected", StatusCodes.Good);
-    Console.WriteLine("Reported motion sensor event.");
 }
 ```
 
-create motion sensor monitor and add eventhandler to the montior
+Finally we hook up the motion sensor monitor with our event handler method:
 
 ```csharp
 static void Main(string[] args)
@@ -70,6 +74,8 @@ static void Main(string[] args)
     motionSensorMonitor.OnMotion += nodeManager.OnMotionDetected;
 }
 ```
+
+
 
 tapio cc monitors the node we created for status changes and reports them to a user specified azure eventhub
 
@@ -159,3 +165,7 @@ An [Azure EventHub](https://azure.microsoft.com/en-us/services/event-hubs/) can 
 That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we're able to present a functioning prototype. For our demo on day four we logged motion sensor data through our connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis for example are tasks still to be done.
 
 Aside from resolving the actual challenges the hackathon was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together! :)
+
+[article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
+[article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
+[article_3]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-3-3
