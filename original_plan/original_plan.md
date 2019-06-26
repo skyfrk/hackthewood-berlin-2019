@@ -1,15 +1,3 @@
----
-title:
-- tapio goes IFTTT
-author:
-- Simon Eßlinger
-date:
-- 20. May 2019
-theme:
-- Copenhagen
-classoption: "aspectratio=169"
----
-
 ## The Idea
 
 The idea is simple: We want to connect the tapio ecosystem with [IFTTT](https://ifttt.com/). This enables every owner of a tapio ready machine to automate his daily business using one or more out of over 600 services.
