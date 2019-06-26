@@ -99,10 +99,8 @@ Below you can see how an event message ingested into our event hub looks like:
 }
 ```
 
-[Streaming data messages](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) from tapio can have different structures.
+[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) property. Every item data message has the type `itd`.
 
-
-https://developer.tapio.one/docs/TapioDataCategories.html#item-data
 
 Reads from eventhub and filters for messages from our pi
 
