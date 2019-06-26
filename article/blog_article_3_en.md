@@ -61,7 +61,7 @@ public void OnMotionDetected()
 }
 ```
 
-Finally we hook up the motion sensor monitor with our event handler method:
+Finally we have to hook up the motion sensor monitor with our event handler method:
 
 ```csharp
 static void Main(string[] args)
@@ -75,11 +75,11 @@ static void Main(string[] args)
 }
 ```
 
+Now we're able to reflect motions in front of our PIR to OPC UA node status changes and CloudConnector automatically forwards these to tapio. As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) streaming this data into a [Azure Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) we deployed us one through the [Azure Portal](http://portal.azure.com/) and configure an app in [my tapio](https://my.tapio.one/) to forward the data to our event hub.
 
+Data ingested into an Azure Event Hub can easily be processed, stored or served for third party apps. As we only want to process and forward events as they come in we opted for a serverless approach [again][article_2] with another Azure Function hooked up to our event hub.
 
-tapio cc monitors the node we created for status changes and reports them to a user specified azure eventhub
-
-https://developer.tapio.one/docs/TapioDataCategories.html
+Below you can see how an event message ingested into our event hub looks like:
 
 ```json
 {
@@ -91,13 +91,18 @@ https://developer.tapio.one/docs/TapioDataCategories.html
     "p": "pi", // provider name
     "k": "MotionSensorState", // key, usually the node id
     "vt": "s", // data value type (string)
-    "v": "some data for IFTTT to play with :)",
+    "v": "motion detected", // payload
     "q": "g", // quality of the value (OPC UA thing)
     "sts": "2017-06-29T10:38:43.7606016+01:00", // ISO8601 timestamp by OPC UA server
     "rts": "2017-06-29T10:38:53.7606016+01:00" // ISO8601 timestamp by CloudConnector
   }
 }
 ```
+
+[Streaming data messages](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) from tapio can have different structures.
+
+
+https://developer.tapio.one/docs/TapioDataCategories.html#item-data
 
 Reads from eventhub and filters for messages from our pi
 
@@ -147,20 +152,9 @@ POST https://maker.ifttt.com/trigger/**motiondetected**/with/key/3Ef9eYIfe3tZIA8
 TODO: remove white edges
 ![Receiving applet config](assets/receiving-applet-config.png)
 
-After the first event flow worked we started working on the second:
-
-1. A sensor of a machine changed its state.
-2. The state change was forwarded to the machines OPC UA server.
-3. The OPC UA server invoked a OPC UA event.
-4. The CloudConnector forwarded the event to the tapio core.
-5. The tapio core forwarded the event to a custom EventHub (preconfigured for given tapio machine id).
-6. The connector received a new event in the EventHub.
-7. The connector forwarded the event via webhook to IFTTT.
-8. An IFTTT-Applet triggered an action from any service.
-
-An [Azure EventHub](https://azure.microsoft.com/en-us/services/event-hubs/) can listen for many events at the same time and provide a queue which event consumers can work through to process all events. We set up an EventHub instance in Azure and connected it through [my tapio](https://admin.tapio.one/) with our machine. Then we set up another Azure Function which consumed events from given EventHub and forwarded them to IFTTT through the webhook service.
-
 ## Conclusion
+
+<!-- Insert Architecture diagram -->
 
 That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we're able to present a functioning prototype. For our demo on day four we logged motion sensor data through our connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis for example are tasks still to be done.
 
