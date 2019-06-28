@@ -1,6 +1,6 @@
-# Connecting the digital worlds (3/3)
+# Connecting the digital worlds (3/3)   
 
-In the [previous article][article_2] we implemented the flow of events from IFTTT to tapio-ready machines. Now we want to implement forwarding events from tapio-ready machines to IFTTT.
+Im [vorherigen Artikel][article_2] haben wir den Weg von Events von IFTTT zu tapio-ready Maschinen implementiert. Jetzt wollen wir den umgekehrten Weg, von tapio-ready Maschinen zu IFTTT implementieren.
 
 * [Connecting the digital worlds (1/3)][article_1]
 * [Connecting the digital worlds (2/3)][article_2]
@@ -8,9 +8,9 @@ In the [previous article][article_2] we implemented the flow of events from IFTT
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.png)
 
-First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin when there is motion in front of it.
+Zuerst brauchen wir eine Möglichkeit, ein Event auf unserer Demo-Maschine auszulösen. Wir haben uns für einen [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor)-Bewegungsmelder entschieden, der über die [GPIO-Schnittstelle](https://www.raspberrypi.org/documentation/usage/gpio/) direkt mit unserer Demo-Maschine verbunden werden kann. Wenn er ordnungsgemäß mit einem Erdungspin, einem Spannungspin und einem generischen GPIO-Datenpin verbunden ist, gibt er einen Strom auf dem GPIO-Pin aus, wenn vor dem Sensor eine Bewegung stattfindet.
 
-Now that our sensor is ready we have to monitor it for status changes in order to react to motion events. Microsofts GPIO library [System.Device.Gpio](https://github.com/dotnet/iot) provides a method `RegisterCallbackForPinValueChangedEvent` through which one can subscribe to rising or falling currents. Using this method we wrote a little wrapper to simplify things a bit:
+Nachdem unser Sensor nun bereit ist, müssen wir ihn auf Statusänderungen überwachen, um auf Bewegungs-Events reagieren zu können. Microsofts GPIO-Bibliothek [System.Device.Gpio](https://github.com/dotnet/iot) stellt eine Methode `RegisterCallbackForPinValueChangedEvent` zur Verfügung, mit welcher man einen Callback für steigende oder fallende Ströme registrieren kann. Mit Hilfe dieser Methode haben wir uns einen kleinen Wrapper geschrieben, um die Dinge ein wenig zu vereinfachen:
 
 ```csharp
 public class MotionSensorMonitor : IMotionSensorMonitor
@@ -33,7 +33,7 @@ public class MotionSensorMonitor : IMotionSensorMonitor
 }
 ```
 
-Now that we're able to react to status changes we want them reflected in the OPC UA server of our demo machine so that these changes can get forwarded to tapio through the CloudConnector also running on our demo machine. So we have to a add a node to our OPC UA servers address space:
+Nachdem wir nun in der Lage sind, auf Statusänderungen zu reagieren, möchten wir, dass diese im OPC UA Server unserer Demo-Maschine als Werte eines Knoten wiedergespiegelt werden, so dass die Events dann über den tapio CloudConnector, der auch auf unserer Demo-Maschine läuft, an tapio weitergeleitet werden können. Also müssen wir dem Adressraum unseres OPC UA Servers einen Knoten hinzufügen:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -46,7 +46,7 @@ protected override void CreateAddressSpace()
 }
 ```
 
-Then we have to add an event handler method to our node manager which updates our `MotionSensorState` node when called:
+Dann müssen wir unserem Knotenmanager eine Methode hinzufügen, welche unseren `MotionSensorState` Knoten aktualisieren kann:
 
 ```csharp
 public void OnMotionDetected()
@@ -59,7 +59,7 @@ public void OnMotionDetected()
 }
 ```
 
-Finally we have to hook up the motion sensor monitor with our event handler method:
+Schließlich müssen wir unseren Bewegungsmelder-Monitor mit der Aktualisierungs-Methode verbinden:
 
 ```csharp
 static void Main(string[] args)
@@ -73,7 +73,7 @@ static void Main(string[] args)
 }
 ```
 
-Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
+Jetzt sind wir in der Lage, Bewegungen vor unserem PIR Bewegungsmelder automatisch als OPC UA Knotenwertänderungen darzustellen. Der CloudConnector kann diese Statusänderungen dann an tapio weiterleiten, wenn wir das Datenmodul des CloudConnectors [korrekt](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem) konfigurieren. Auf den konfigurierten `SrcKey` kommen wir gleich zurück.
 
 ```xml
 ...
