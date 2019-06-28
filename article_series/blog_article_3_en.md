@@ -73,7 +73,7 @@ static void Main(string[] args)
 }
 ```
 
-Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
+Now we're able to reflect motions in front of our PIR motion sensor to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
 
 ```xml
 ...
