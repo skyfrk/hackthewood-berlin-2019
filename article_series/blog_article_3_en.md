@@ -88,7 +88,7 @@ As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#st
 
 Data ingested into an Azure Event Hub can easily be processed, stored or served for third party apps. As we only want to process and forward events as they come in we opted for a serverless approach [again][article_2] with another Azure Function hooked up to our event hub.
 
-Below you can see how an event message ingested into our event hub looks like:
+Below we can see how an event message ingested into our event hub looks like:
 
 ```json
 {
