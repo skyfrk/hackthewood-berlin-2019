@@ -29,7 +29,7 @@ Jetzt sind wir dazu in der Lage einen lokalen Port unter einer ngrok URL dem Int
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
 
-After running the above we're given a monitor screen in our terminal. Behind the `Forwarding` keyword we can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. We can verify if everything is working correctly by opening the ngrok URL in our web browser (sending a GET request). As we can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
+Nachdem wir den obigen Befehl ausgeführt haben wird uns der aktuelle Zustand von unserem ngrok-Tunnel ausgegeben. Hinter `Forwarding` sieht man aktive Tunnel. In unserem Beispiel unten wird unsere lokale Azure Function unter der URL `http://qyt7q40w03.ngrok.io` dem Internet zugänglich gemacht. Wir können überprüfen, ob alles korrekt funktioniert, indem wir die ngrok URL in unserem Webbrowser öffnen, wobei wir eine GET-Request an unsere Azure Function senden. Wir wir sehen können wurde eine GET Request aufgezeichnet, der ngrok-Tunnel funktioniert also! Wenn wir uns die übermittelten Requests genauer anschauen wollen können wir uach das ngrok Webinterface unter `localhost:4040` aufrufen.
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
@@ -51,15 +51,15 @@ HTTP Requests
 GET /WebhookProcessorFunction               200 OK
 ```
 
-To actually develop and debug with real HTTP requests from IFTTT we have to create an applet with a trigger under our control and an action which sends HTTP requests to our local Azure Function exposed through ngrok. Therefore we create an applet which sends a POST request into our ngrok tunnel when we press a button on our smartphone:
+Um tatsächlich mit echten HTTP-Requests von IFTTT zu entwickeln und zu debuggen, müssen wir ein Applet mit einem Trigger unter unserer Kontrolle und einer Aktion erstellen, die HTTP-Requests an unsere lokale Azure Function sendet, die durch ngrok freigegeben wird. Deshalb erstellen wir ein Applet, das eine POST-Request in unseren ngrok-Tunnel sendet, wenn wir auf unserem Smartphone einen Widget-Button drücken:
 
 ![Applet config](assets/applet-config.png)
 
-Because of our limited time frame to create everything we opted for a plain text body with a simple event name to lower complexity. Further down the line one could however transmit full blown JSON objects.
+Aufgrund unseres begrenzten Zeitrahmens haben wir uns dazu entschieden lediglich eine Request mit Klartext-Body mit einem einfachen Event-Namen zu schicken, um die Komplexität zu reduzieren. Später könnte man jedoch auch ganze JSON-Objekte übertragen.
 
-Now for the good stuff: The implementation of the Azure Function. The code below basically waits for GET or POST requests, parses the body of the request, interprets it as event and then forwards it to the machine using the Commanding API.
+Nun zum spaßigen Teil: Die Implementierung der Azure Function. Der folgende Code wartet im Wesentlichen auf GET- oder POST-Requests, analysiert den Body der Request, interpretiert ihn als Event und leitet ihn dann über die Commanding API an unsere Demo-Maschine weiter.
 
-The Commanding API is normally used to alter item values or call methods on a OPC UA server associated with the CloudConnector but we figured we can use an item write request as well to transmit an event. On OPC UA server side we then just have to wait for item state changes and interpret them as events.
+Die Commanding API wird normalerweise verwendet, um Werte oder Methoden von Knoten auf einem OPC UA-Server zu ändern, der dem CloudConnector einer Maschine zugeordnet ist, aber wir dachten uns, dass wir auch die einfache Wertänderung eines Knoten verwenden können, um ein Event zu übertragen. Auf der OPC UA Server Seite müssen wir dann nur noch auf eine Änderunge des Knoten-Zustandes warten und diese als Event interpretieren.
 
 ```csharp
 [FunctionName("WebhookProcessorFunction")]
@@ -89,7 +89,7 @@ public static async Task<IActionResult> Run(
 }
 ```
 
-The `EventFactory` class is responsible for mapping event data from IFTTT to our generic event model:
+Die `EventFactory`-Klasse ist dafür verantwortlich IFTTT-Event-Daten in unsere selbst definierte generische Event-Klasse umzuwandeln: 
 
 ```csharp
 public class Event
