@@ -10,26 +10,26 @@ In the [previous article][article_1] we clarified the idea of the challenge and 
 
 As [previously specified][article_1] we want to use the IFTTT Webhook service so that when an applet using the Webhook service is triggered we will receive a HTTP request at the endpoint specified in the applet. We then want to process the request and forward the event to the machine using [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html). The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
 
-When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach. As you can tell by its name there are no servers in a serverless architecture but rather snippets of code which execute on certain conditions. Of course these snippets still run on a server but not on our servers. This way we can safe money because we don't have to operate or rent a server 24/7 and in addition we don't have to worry about setting up a server, installing a runtime environment etc. There are multiple products available for implementing serverless architectures. We picked Azure Functions from Microsofts cloud platform Azure.
+When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach. As you can tell by its name there are no servers in a serverless architecture but rather snippets of code which execute on certain conditions. Of course these snippets still run on a server but not on our servers. This way we can safe money because we don't have to operate or rent a server 24/7 and in addition we don't have to worry about setting up a server, installing a runtime environment etc. There are multiple products available for implementing serverless architectures. We picked [Azure Functions](https://azure.microsoft.com/en-us/services/functions/) from Microsofts cloud platform Azure.
 
-When we started coding the desire for proper debugging arised rather quickly. So how does one debug an Azure Function? You can't simply establish a debugging session to your deployed function. Instead you have to run the Azure Function locally and forward the HTTP requests from IFTTT to your local machine and this is where [ngrok](https://ngrok.com/) came in handy.
+When we started coding the desire for proper debugging arised rather quickly. So how does one debug an Azure Function? We can't simply establish a debugging session to our deployed function. Instead we have to run the Azure Function locally and forward the HTTP requests from IFTTT to our local machine and this is where [ngrok](https://ngrok.com/) came in handy.
 
-With [ngrok](https://ngrok.com/) you're able to expose a local server behind a NAT or firewall to the internet and therefore IFTTT and it's dead simple:
+With [ngrok](https://ngrok.com/) we're able to expose a local server behind a NAT or firewall to the internet and therefore IFTTT and it's dead simple:
 
-You only have to register on [ngrok.com](https://ngrok.com/), download the executable and create yourself an `auth token` (replace `some_token` with the key provided for your account on [ngrok.com](https://ngrok.com/)).
+We only have to register on [ngrok.com](https://ngrok.com/), download the executable and create ourselves an `auth token` (replace `some_token` with the key provided for our account on [ngrok.com](https://ngrok.com/)).
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok authtoken some_token
 Authtoken saved to configuration file: C:\Users\Simon/.ngrok2/ngrok.yml   
 ```
 
-Now you're already able to expose a local port. In the example below we're exposing the local port our Azure Function is using:
+Now we're already able to expose a local port. In the example below we're exposing the local port our Azure Function is using:
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
 
-After running the above you're given a monitor screen in your terminal. Behind the `Forwarding` keyword you can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. You can verify if everything is working correctly by opening the ngrok  URL in your web browser (sending a GET request). As you can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
+After running the above we're given a monitor screen in our terminal. Behind the `Forwarding` keyword we can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. We can verify if everything is working correctly by opening the ngrok URL in our web browser (sending a GET request). As we can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
