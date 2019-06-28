@@ -155,11 +155,11 @@ Wenn man den Body benutzt könnte man jede Art von Ereignisdaten an IFTTT übert
 
 ![Receiving applet config](assets/receiving-applet-config.png)
 
-## Conclusion
+## Fazit
 
-That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we were able to present a functioning prototype. For our demo on day four we logged motion sensor data through our tapio-IFTTT-Connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis are mandatory for a feature complete solution. Our code base also lacks a huge refactoring... :D
+Das war's! Zwei Azure Functions, ein Event Hub, ein Raspberry Pi und drei Werktage später konnten wir einen funktionierenden Prototyp präsentieren. Für unsere Demo am vierten Tag haben wir Bewegungssensordaten über unseren tapio-IFTTT-Konnektor in ein Google Drive Tabelle geschrieben, eine RGB-LED per Widget-Taste auf einem Smartphone eingeschaltet und ein neues IFTTT-Applet live konfiguriert. Wir haben kein direkt verkaufbares Produkt entwickelt, aber einen funktionierenden Proof of Concept auf Basis der Plattform tapio erstellt, der in ein echtes Produkt umgesetzt werden kann. Authentifizierung, Autorisierung und eine Webanwendung zur Konfiguration von Events wären beispielsweise für eine saubere Implementierung noch zu realisieren. Unserer Code hätte auch noch ein großes Refactoring nötig... :D
 
-Aside from resolving the actual challenges [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together in Berlin!
+Neben dem Lösen der Herausforderungen war [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) vor allem eine lustige Veranstaltung mit tollen Teilnehmern, die sich gegenseitig jederzeit geholfen haben und eine tolle Zeit zusammen in Berlin hatten!
 
 [article_1]: https://www.tapio.one/de/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/de/blog/connecting-the-digital-worlds-2-3
