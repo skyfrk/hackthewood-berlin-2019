@@ -10,8 +10,6 @@ In the [previous article][article_2] we implemented the flow of events from IFTT
 
 First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin when there is motion in front of it.
 
-<!-- TODO insert wiring picture -->
-
 Now that our sensor is ready we have to monitor it for status changes in order to react to motion events. Microsofts GPIO library [System.Device.Gpio](https://github.com/dotnet/iot) provides a method `RegisterCallbackForPinValueChangedEvent` through which one can subscribe to rising or falling currents. Using this method we wrote a little wrapper to simplify things a bit:
 
 ```csharp
@@ -156,8 +154,6 @@ Taking advantage of the body structure one could transmit any kind of event data
 ![Receiving applet config](assets/receiving-applet-config.png)
 
 ## Conclusion
-
-<!-- Insert Architecture diagram -->
 
 That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we were able to present a functioning prototype. For our demo on day four we logged motion sensor data through our tapio-IFTTT-Connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis are mandatory for a feature complete solution. Our code base also lacks a huge refactoring... :D
 
