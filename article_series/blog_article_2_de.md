@@ -1,6 +1,6 @@
 # Connecting the digital worlds (2/3)
 
-Im[vorherigen Artikel][article_1] haben wir die Idee der Challenge erklärt und eine Demo-Maschine eingerichtet. In diesem Artikel nehmen wir uns die Implementierung der ersten Route für Events im tapio-IFTTTT-Connector vor: Von IFTTTT bis hin zu tapio-ready Maschinen.
+Im[vorherigen Artikel][article_1] haben wir die Idee der Challenge erklärt und eine Testmaschine eingerichtet. In diesem Artikel nehmen wir uns die Implementierung der ersten Route für Events im tapio-IFTTTT-Connector vor: Von IFTTTT bis hin zu tapio-ready Maschinen.
 
 * [Connecting the digital worlds (1/3)][article_1]
 * [Connecting the digital worlds (2/3)][article_2]
@@ -8,9 +8,9 @@ Im[vorherigen Artikel][article_1] haben wir die Idee der Challenge erklärt und 
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-Wie [bereits erwähnt][article_1], möchten wir den IFTTT Webhook-Dienst verwenden, so dass wir beim Auslösen eines Applets, das den Webhook-Dienst verwendet, eine HTTP-Request an dem im Applet angegebenen Endpunkt gesendet wird. Dann wollen wir die Request bearbeiten und das Event über die [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html) an die Maschine weiterleiten. Die Commanding-API wird typischerweise verwendet, um mit [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/)-Servern zu interagieren, die auf tapio-ready Maschinen laufen.
+Wie [bereits erwähnt][article_1], möchten wir den IFTTT Webhook-Dienst verwenden, so dass wir beim Auslösen eines Applets, welches den Webhook-Dienst verwendet, eine HTTP-Request an dem im Applet angegebenen Endpunkt senden. Diese Request wollen wir dann verarbeiten und das Event über die [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html) an die Maschine weiterleiten. Die Commanding-API wird typischerweise verwendet, um mit [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/)-Servern zu interagieren, welche auf tapio-ready Maschinen laufen.
 
-Als wir feststellten, dass unser tapio-IFTTTT-Connector lediglich eine HTTP-Request empfangen, dann verarbeiten und schließlich eine weitere HTTP-Request stellen muss, haben wir uns für einen [serverlosen Implementierungsansatz][(https://martinfowler.com/articles/serverless.html)] entschieden. Wie man am Namen erkennen kann, gibt es in einer serverlosen Architektur keine Server, sondern Codeschnipsel, die nur unter bestimmten Bedingungen ausgeführt werden. Natürlich laufen diese Ausschnitte immer noch auf einem Server, aber nicht auf unseren Servern. Auf diese Weise können wir Geld sparen, weil wir keinen Server rund um die Uhr betreiben oder mieten müssen und uns außerdem keine Gedanken um die Einrichtung eines Servers, die Installation einer Laufzeitumgebung usw. machen müssen. Für die Implementierung von serverlosen Architekturen stehen mehrere Produkte zur Verfügung. Wir haben uns für [Azure Functions](https://azure.microsoft.com/de-de/services/functions/) von Microsofts Cloud-Plattform Azure entschieden.
+Als wir feststellten, dass unser tapio-IFTTTT-Connector lediglich eine HTTP-Request empfangen, dann verarbeiten und schließlich eine weitere HTTP-Request stellen muss, haben wir uns für einen [serverlosen Implementierungsansatz][(https://martinfowler.com/articles/serverless.html)] entschieden. Wie man am Namen erkennen kann, gibt es in einer serverlosen Architektur keine Server, sondern Codeschnipsel, die nur unter bestimmten Bedingungen ausgeführt werden. Natürlich laufen diese Codeschnipsel immer noch auf einem Server, aber nicht eigenen. Auf diese Weise können wir Geld sparen, weil wir keinen Server rund um die Uhr betreiben oder mieten müssen und uns außerdem keine Gedanken um die Einrichtung eines Servers, die Installation einer Laufzeitumgebung usw. machen müssen. Für die Implementierung von serverlosen Architekturen stehen mehrere Produkte zur Verfügung. Wir haben uns für [Azure Functions](https://azure.microsoft.com/de-de/services/functions/) von Microsofts Cloud-Plattform Azure entschieden.
 
 Nach den ersten Zeilen Code, entstand recht schnell der Wunsch nach einer Möglichkeit unsere Azure Function zu debuggen. Wie also debuggt man eine Azure Function? Man kann nicht einfach eine Debugging-Session zu einer Azure Function in der Cloud aufbauen. Stattdessen müssen wir die Azure Function lokal ausführen und die HTTP-Requests von IFTTT an unseren lokalen Rechner weiterleiten. Hier war uns [ngrok](https://ngrok.com/) sehr nützlich.
 
@@ -23,13 +23,13 @@ PS C:\Program Files\ngrok> ./ngrok authtoken ein_token
 Authtoken saved to configuration file: C:\Users\Simon/.ngrok2/ngrok.yml   
 ```
 
-Jetzt sind wir dazu in der Lage einen lokalen Port unter einer ngrok URL dem Internet freizugeben. Im folgenden Beispiel geben wir unsere lokal auf Port 1337 laufende Azure Function frei:
+Jetzt sind wir dazu in der Lage eine lokale Anwendung mit einer ngrok URL dem Internet zugänglich zu machen. Im folgenden Beispiel geben wir unsere lokal auf Port 1337 laufende Azure Function frei:
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
 
-Nachdem wir den obigen Befehl ausgeführt haben wird uns der aktuelle Zustand von unserem ngrok-Tunnel ausgegeben. Hinter `Forwarding` sieht man aktive Tunnel. In unserem Beispiel unten wird unsere lokale Azure Function unter der URL `http://qyt7q40w03.ngrok.io` dem Internet zugänglich gemacht. Wir können überprüfen, ob alles korrekt funktioniert, indem wir die ngrok URL in unserem Webbrowser öffnen, wobei wir eine GET-Request an unsere Azure Function senden. Wir wir sehen können wurde eine GET Request aufgezeichnet, der ngrok-Tunnel funktioniert also! Wenn wir uns die übermittelten Requests genauer anschauen wollen können wir uach das ngrok Webinterface unter `localhost:4040` aufrufen.
+Nachdem wir den obigen Befehl ausgeführt haben wird uns der aktuelle Zustand von unserem ngrok-Tunnel ausgegeben. Hinter `Forwarding` sieht man aktive Tunnel. In unserem Beispiel unten wird unsere lokale Azure Function unter der URL `http://qyt7q40w03.ngrok.io` dem Internet zugänglich gemacht. Wir können überprüfen, ob alles korrekt funktioniert, indem wir die ngrok URL in unserem Webbrowser öffnen, wobei wir eine GET-Request an unsere Azure Function senden. Wir wir sehen können wurde eine GET Request aufgezeichnet, der ngrok-Tunnel funktioniert also! Wenn wir uns die übermittelten Requests genauer anschauen wollen können wir auch das ngrok Webinterface unter `localhost:4040` aufrufen.
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
@@ -57,9 +57,9 @@ Um tatsächlich mit echten HTTP-Requests von IFTTT zu entwickeln und zu debuggen
 
 Aufgrund unseres begrenzten Zeitrahmens haben wir uns dazu entschieden lediglich eine Request mit Klartext-Body mit einem einfachen Event-Namen zu schicken, um die Komplexität zu reduzieren. Später könnte man jedoch auch ganze JSON-Objekte übertragen.
 
-Nun zum spaßigen Teil: Die Implementierung der Azure Function. Der folgende Code wartet im Wesentlichen auf GET- oder POST-Requests, analysiert den Body der Request, interpretiert ihn als Event und leitet ihn dann über die Commanding API an unsere Demo-Maschine weiter.
+Nun zum spaßigen Teil: Die Implementierung der Azure Function. Der folgende Code wartet im Wesentlichen auf GET- oder POST-Requests, analysiert dann den Body der Request, interpretiert ihn als Event und leitet ihn dann über die Commanding API an unsere Testmaschine weiter.
 
-Die Commanding API wird normalerweise verwendet, um Werte oder Methoden von Knoten auf einem OPC UA-Server zu ändern, der dem CloudConnector einer Maschine zugeordnet ist, aber wir dachten uns, dass wir auch die einfache Wertänderung eines Knoten verwenden können, um ein Event zu übertragen. Auf der OPC UA Server Seite müssen wir dann nur noch auf eine Änderunge des Knoten-Zustandes warten und diese als Event interpretieren.
+Die Commanding API wird normalerweise verwendet, um Werte oder Methoden von Knoten auf einem OPC UA-Server zu ändern, der dem CloudConnector einer Maschine zugeordnet ist, aber wir dachten uns, dass wir auch die einfache Wertänderung eines Knoten verwenden können, um ein Event zu übertragen. Auf der OPC UA Server Seite müssen wir dann nur noch auf eine Änderung des Knoten-Zustandes warten und diese als Event interpretieren.
 
 ```csharp
 [FunctionName("WebhookProcessorFunction")]
@@ -105,7 +105,7 @@ Aus Zeitgründen haben wir die Unterstützung von Events mit beliebigen Eigensch
 
 Wenn wir jetzt versuchen würden unser System zu testen, würden Events ihre Zielmaschine nicht erreichen, weil wir die XML-Konfiguration des tapio CloudConnectors noch nicht angepasst haben. Standardmäßig können wir aus Sicherheitsgründen nicht auf einen OPC UA Knoten über die Commanding API zugreifen, bis wir den Zugriff in der Konfigurationsdatei einrichten.
 
-In dem Beispiel unten erweitern wir die Konfiguartion des `DataModule01` um die Konfiguration unseres Event-verarbeitenden OPC UA Servers `SensorServer`, welche wiederum einen Schreib-Befehl `ProcessEvent` für einen Knoten konfiguriert:
+In dem Beispiel unten erweitern wir die Konfiguration des `DataModule01` um die Konfiguration unseres Event-verarbeitenden OPC UA Servers `SensorServer`, welche wiederum einen Schreib-Befehl `ProcessEvent` für einen Knoten konfiguriert:
 
 ```xml
 ...
@@ -137,9 +137,9 @@ In dem Beispiel unten erweitern wir die Konfiguartion des `DataModule01` um die 
 ...
 ```
 
-Jetzt sind wir fast startklar. Events werden nun an den OPC UA Server weitergeleitet, welcher auf unserer Demo-Maschine läuft. Aber diesem Server fehlt noch der konfigurierte Knoten und die dahinter stehende Logik.
+Jetzt sind wir fast startklar. Events werden nun an den OPC UA Server weitergeleitet, welcher auf unserer Testmaschine läuft. Aber diesem Server fehlt noch der konfigurierte Knoten und die dahinter stehende Logik.
 
-Also fügen wir einen `DataVariableState` Knoten vom Typ `String` dem Adressraum unseres OPC UA Servers hinzu. Um eingehende Events verarbeiten zu können, müssen wir nun auf jede einzelne Statusänderung des Knotes reagieren können. Wir haben das implementiert, indem wir einen benutzerdefinierten Event-Handler an das Event `WriteCalled` unseres Knotens angehängt haben:
+Also fügen wir einen `DataVariableState` Knoten vom Typ `String` dem Adressraum unseres OPC UA Servers hinzu. Um eingehende Events verarbeiten zu können, müssen wir nun auf jede einzelne Statusänderung des Knotens reagieren können. Wir haben das implementiert, indem wir einen benutzerdefinierten Event-Handler an das Event `WriteCalled` unseres Knotens angehängt haben:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -153,9 +153,9 @@ protected override void CreateAddressSpace()
 }
 ```
 
-Um physisch zu zeigen, dass unsere Demo-Maschine ein Event erhalten hat, möchten wir die an unserer Demo-Maschine angebrachte LED auf verschiedene Weise blinken lassen. Daher müssen wir eine Abstraktionsschicht implementieren, um die LED zu steuern, die über die GPIO-Schnittstelle unserer Demo-Maschine angeschlossen ist.
+Um physisch zu zeigen, dass unsere Testmaschine ein Event erhalten hat, möchten wir die an unserer Testmaschine angebrachte LED auf verschiedene Weise blinken lassen. Dafür müssen wir eine Abstraktionsschicht implementieren, um die LED anzusteuern, die über die GPIO-Schnittstelle unserer Testmaschine angeschlossen ist.
 
-Daher definieren wir eine Schnittstelle für die LED, um die GPIO-Logik zu abstrahieren, und eine weitere für einen LED-Controller, der zusätzlich in der Lage ist, Lichtsequenzen zu verarbeiten:
+Also definieren wir eine Schnittstelle für die LED, um die GPIO-Logik zu abstrahieren, und eine weitere für einen LED-Controller, der zusätzlich in der Lage ist, Lichtsequenzen zu verarbeiten:
 
 ```csharp
 public interface ILedController

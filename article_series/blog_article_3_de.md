@@ -8,9 +8,9 @@ Im [vorherigen Artikel][article_2] haben wir den Weg von Events von IFTTT zu tap
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-machine.png)
 
-Zuerst brauchen wir eine Möglichkeit, ein Event auf unserer Demo-Maschine auszulösen. Wir haben uns für einen [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor)-Bewegungsmelder entschieden, der über die [GPIO-Schnittstelle](https://www.raspberrypi.org/documentation/usage/gpio/) direkt mit unserer Demo-Maschine verbunden werden kann. Wenn er ordnungsgemäß mit einem Erdungspin, einem Spannungspin und einem generischen GPIO-Datenpin verbunden ist, gibt er einen Strom auf dem GPIO-Pin aus, wenn vor dem Sensor eine Bewegung stattfindet.
+Zuerst brauchen wir eine Möglichkeit, ein Event auf unserer Testmaschine auszulösen. Wir haben uns für einen [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor)-Bewegungsmelder entschieden, der über die [GPIO-Schnittstelle](https://www.raspberrypi.org/documentation/usage/gpio/) direkt mit unserer Testmaschine verbunden werden kann. Wenn er ordnungsgemäß mit einem Erdungspin, einem Spannungspin und einem generischen GPIO-Datenpin verbunden ist, gibt er einen Strom auf dem GPIO-Pin aus, wenn vor dem Sensor eine Bewegung stattfindet.
 
-Nachdem unser Sensor nun bereit ist, müssen wir ihn auf Statusänderungen überwachen, um auf Bewegungs-Events reagieren zu können. Microsofts GPIO-Bibliothek [System.Device.Gpio](https://github.com/dotnet/iot) stellt eine Methode `RegisterCallbackForPinValueChangedEvent` zur Verfügung, mit welcher man einen Callback für steigende oder fallende Ströme registrieren kann. Mit Hilfe dieser Methode haben wir uns einen kleinen Wrapper geschrieben, um die Dinge ein wenig zu vereinfachen:
+Nachdem unser Sensor nun bereit ist, müssen wir ihn auf Statusänderungen überwachen, um folgend auf Bewegungs-Events reagieren zu können. Microsofts GPIO-Bibliothek [System.Device.Gpio](https://github.com/dotnet/iot) stellt eine Methode `RegisterCallbackForPinValueChangedEvent` zur Verfügung, mit welcher man einen Callback für steigende oder fallende Ströme registrieren kann. Mit Hilfe dieser Methode haben wir uns einen kleinen Wrapper geschrieben, um die Dinge ein wenig zu vereinfachen:
 
 ```csharp
 public class MotionSensorMonitor : IMotionSensorMonitor
@@ -33,7 +33,7 @@ public class MotionSensorMonitor : IMotionSensorMonitor
 }
 ```
 
-Nachdem wir nun in der Lage sind, auf Statusänderungen zu reagieren, möchten wir, dass diese im OPC UA Server unserer Demo-Maschine als Werte eines Knoten wiedergespiegelt werden, so dass die Events dann über den tapio CloudConnector, der auch auf unserer Demo-Maschine läuft, an tapio weitergeleitet werden können. Also müssen wir dem Adressraum unseres OPC UA Servers einen Knoten hinzufügen:
+Nachdem wir nun in der Lage sind, auf Statusänderungen zu reagieren, möchten wir, dass diese im OPC UA Server unserer Testmaschine als Werte eines Knoten wiedergespiegelt werden, so dass die Events dann über den tapio CloudConnector, der auch auf unserer Testmaschine läuft, an tapio weitergeleitet werden können. Also müssen wir dem Adressraum unseres OPC UA Servers einen Knoten hinzufügen:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -73,7 +73,7 @@ static void Main(string[] args)
 }
 ```
 
-Jetzt sind wir in der Lage, Bewegungen vor unserem PIR Bewegungsmelder automatisch als OPC UA Knotenwertänderungen darzustellen. Der CloudConnector kann diese Statusänderungen dann an tapio weiterleiten, wenn wir das Datenmodul des CloudConnectors [korrekt](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem) konfigurieren. Auf den konfigurierten `SrcKey` kommen wir gleich zurück.
+Jetzt sind wir in der Lage, Bewegungen vor unserem PIR-Bewegungsmelder automatisch als OPC UA Knotenwertänderungen darzustellen. Der CloudConnector kann diese Statusänderungen dann an tapio weiterleiten, wenn wir das Datenmodul des CloudConnectors [korrekt](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem) konfigurieren. Auf den konfigurierten `SrcKey` kommen wir gleich zurück.
 
 ```xml
 ...
@@ -84,9 +84,9 @@ Jetzt sind wir in der Lage, Bewegungen vor unserem PIR Bewegungsmelder automatis
 ...
 ```
 
-Da tapio das Streaming dieser Daten in einen Azure Event Hub [unterstützt](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data), haben wir uns schnell einen [Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) über das [Azure Portal](http://portal.azure.com/) bereitgestellt und eine App in [my tapio](https://my.tapio.one/) konfiguriert, um die Daten an unseren Event Hub weiterzuleiten.
+Da tapio das Streaming dieser Daten in einen Azure Event Hub [unterstützt](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data), haben wir uns schnell einen [Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) über das [Azure Portal](http://portal.azure.com/) bereitgestellt und eine App in [my tapio](https://my.tapio.one/) konfiguriert, welche die Streaming-Daten an unseren Event Hub weiterleitet.
 
-Daten die in einem Azure Event Hub ankommen, können problemlos für Anwendungen von Drittanbietern verarbeitet, gespeichert oder bereitgestellt werden. Da wir  Ereignisse, wie sie hereinkommen, nur verarbeiten und weiterleiten wollen, haben wir uns [wieder][article_2] für einen serverlosen Ansatz entschieden, mit einer weiteren Azure Function, welche Events aus unseren Event-Hub konsumiert.
+Daten die in einem Azure Event Hub ankommen, können problemlos für Anwendungen von Drittanbietern verarbeitet, gespeichert oder bereitgestellt werden. Da wir  Ereignisse, nur verarbeiten und weiterleiten wollen, haben wir uns [wieder][article_2] für einen serverlosen Ansatz entschieden, mit einer weiteren Azure Function, welche Events aus unseren Event-Hub konsumiert.
 
 Hier sehen wir, wie eine in unserem Event-Hub von tapio eingespeiste Event-Nachricht aussieht:
 
@@ -108,9 +108,9 @@ Hier sehen wir, wie eine in unserem Event-Hub von tapio eingespeiste Event-Nachr
 }
 ```
 
-[Streaming-Daten](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) von tapio, die von unserem Event-Hub empfangen werden, können unterschiedliche Strukturen aufweisen. Wir sind nur an Daten der Form [`Item Data`](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) interessiert, weil wir nur die Statusänderungen unseres PIR-Bewegungsmelder-Monitorknotens überwachen wollen. Wir können eine Streaming-Daten vom Typ `Item Data` erkennen, wenn wir einen Blick auf die Eigenschaft `msgt` (Nachrichtentyp) werfen. Streaming-Daten vom Typ `Item Data` haben immer den Nachrichtentyp `itd`.
+[Streaming-Daten](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) von tapio, die von unserem Event-Hub empfangen werden, können unterschiedliche Strukturen aufweisen. Wir sind nur an Daten der Form [`Item Data`](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) interessiert, weil wir nur die Statusänderungen unseres PIR-Bewegungsmelder-Monitorknotens überwachen wollen. Wir können Streaming-Daten vom Typ `Item Data` erkennen, wenn wir einen Blick auf die Eigenschaft `msgt` (Nachrichtentyp) werfen. Streaming-Daten vom Typ `Item Data` haben immer den Nachrichtentyp `itd`.
 
-Die Eigenschaft `msg` enthält die eigentliche Nachricht als JSON-Objekt. Hier suchen wir nach Nachrichten, deren `k` der zuvor konfigurierte `SrcKey` ist. Der Wert, den wir dann weiterleiten, verbirgt sich hinter dem Schlüssel `v`. Um die Dinge weiter einfach zu halten, übertragen wir hier nur eine einfache Zeichenkette (hier `motiondetected`), aber später könnte man natürlich auch beliebig komplexe Events übertragen, wenn man sie beispielsweise als JSON-Objekt serialisiert.
+Die Eigenschaft `msg` enthält die eigentliche Nachricht als JSON-Objekt. Hier interessieren wir uns nur für Nachrichten, deren `k` der zuvor konfigurierte `SrcKey` ist. Der weitergeleitete Wert, welcher ein Event darstellt, verbirgt sich hinter dem Schlüssel `v`. Um die Dinge weiter einfach zu halten, übertragen wir nur eine einfache Zeichenkette (hier `motiondetected`), aber später könnte man natürlich auch beliebig komplexe Events übertragen, wenn man sie beispielsweise als JSON-Objekt serialisiert.
 
 Unten sehen wir eine vereinfachte Version unserer Event-Hub-Prozessor-Azure-Function:
 
@@ -135,7 +135,7 @@ CancellationToken cancellationToken)
 }
 ```
 
-Ähnlich wie bei unserer [anderen Azure Function][article_2] konsumieren wir hier einfach Nachrichten von unserem Event Hub und leiten sie dann an IFTTT weiter. Die `SendEventToIFTTT`-Methode macht dabei nichts anderes als einen einfach HTTP-Request an den IFTTT Webhook-Dienst:
+Ähnlich wie bei unserer [anderen Azure Function][article_2] konsumieren wir hier einfach Nachrichten von unserem Event Hub und leiten sie dann an IFTTT weiter. Die `SendEventToIFTTT`-Methode macht dabei nichts anderes als einen einfach HTTP-Request an den IFTTT Webhook-Dienst zu senden:
 
 POST `https://maker.ifttt.com/trigger/<name of the event>/with/key/<hier webhook service account schlüssel eintragen>`
 
@@ -149,13 +149,15 @@ Den Webhook-Service-Schlüssel erhält man [hier](https://ifttt.com/maker_webhoo
 }
 ```
 
-Wenn man den Body benutzt könnte man jede Art von Ereignisdaten an IFTTT übertragen. Schließlich müssen wir noch ein Applet in IFTTT konfigurieren, um unsere Implementierung zu testen. Wir haben beispielsweise [Google Sheets](https://ifttt.com/services/google_sheets) mit dem Webhook-Service kombiniert:
+Wenn man den Body benutzt kann man jede Art von Ereignisdaten an IFTTT übertragen.
+
+Schließlich müssen wir noch ein Applet in IFTTT konfigurieren, um unsere Implementierung zu testen. Wir haben beispielsweise [Google Sheets](https://ifttt.com/services/google_sheets) mit dem Webhook-Service kombiniert:
 
 ![Receiving applet config](assets/receiving-applet-config.png)
 
 ## Fazit
 
-Das war's! Zwei Azure Functions, ein Event Hub, ein Raspberry Pi und drei Werktage später konnten wir einen funktionierenden Prototyp präsentieren. Für unsere Demo am vierten Tag haben wir Bewegungssensordaten über unseren tapio-IFTTT-Konnektor in ein Google Drive Tabelle geschrieben, eine RGB-LED per Widget-Taste auf einem Smartphone eingeschaltet und ein neues IFTTT-Applet live konfiguriert. Wir haben kein direkt verkaufbares Produkt entwickelt, aber einen funktionierenden Proof of Concept im tapio Ökosystem erstellt, der in ein echtes Produkt umgesetzt werden kann. Authentifizierung, Autorisierung und eine Webanwendung zur Konfiguration von Events wären beispielsweise für eine saubere Implementierung noch zu realisieren und unser Code hätte auch noch ein großes Refactoring nötig... :D
+Das war's! Zwei Azure Functions, ein Event Hub, ein Raspberry Pi und drei Werktage später konnten wir einen funktionierenden Prototyp präsentieren. Für unsere Demo am vierten Tag haben wir Bewegungssensordaten über unseren tapio-IFTTT-Konnektor in ein Google Drive Tabelle geschrieben, eine RGB-LED per Widget-Taste auf einem Smartphone eingeschaltet und ein neues IFTTT-Applet live konfiguriert. Wir haben kein direkt verkaufbares Produkt entwickelt, aber einen funktionierenden Proof of Concept im tapio Ökosystem geschaffen, der in ein echtes Produkt umgesetzt werden kann. Authentifizierung, Autorisierung und eine Webanwendung zur Konfiguration von Events wären beispielsweise für eine saubere Implementierung noch zu realisieren und unser Code hätte auch noch ein großes Refactoring nötig... :D
 
 Aber neben dem Lösen der Herausforderungen war [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) vor allem eine lustige Veranstaltung mit tollen Teilnehmern, die sich gegenseitig jederzeit geholfen haben und eine tolle Zeit zusammen in Berlin hatten!
 
