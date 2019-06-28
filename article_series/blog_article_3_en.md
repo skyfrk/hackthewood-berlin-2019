@@ -10,8 +10,6 @@ In the [previous article][article_2] we implemented the flow of events from IFTT
 
 First off we need a way to trigger an event on our demo machine. We decided to go with a [AM312](https://www.sunrom.com/p/micro-pir-motion-detection-sensor-am312) [PIR](https://en.wikipedia.org/wiki/Passive_infrared_sensor) motion sensor which can be directly connected to the demo machine through its [GPIO interface](https://www.raspberrypi.org/documentation/usage/gpio/). When properly connected to a ground pin, a voltage pin and a generic GPIO data pin it'll output a current on the GPIO pin when there is motion in front of it.
 
-<!-- TODO insert wiring picture -->
-
 Now that our sensor is ready we have to monitor it for status changes in order to react to motion events. Microsofts GPIO library [System.Device.Gpio](https://github.com/dotnet/iot) provides a method `RegisterCallbackForPinValueChangedEvent` through which one can subscribe to rising or falling currents. Using this method we wrote a little wrapper to simplify things a bit:
 
 ```csharp
@@ -48,7 +46,7 @@ protected override void CreateAddressSpace()
 }
 ```
 
-Then we have to add an event handler method to our node manager which updates our `MotionSensorState` node when called:
+Then we have to add a method to our node manager which updates our `MotionSensorState` node when called:
 
 ```csharp
 public void OnMotionDetected()
@@ -75,7 +73,7 @@ static void Main(string[] args)
 }
 ```
 
-Now we're able to reflect motions in front of our PIR to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
+Now we're able to reflect motions in front of our PIR motion sensor to OPC UA node status changes. CloudConnector can forward these status changes to tapio if we configure the data module of the CloudConnector [correctly](https://developer.tapio.one/docs/CloudConnector/DataModule.html#sourcedataitem). Keep the configured `SrcKey` in mind.
 
 ```xml
 ...
@@ -90,7 +88,7 @@ As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#st
 
 Data ingested into an Azure Event Hub can easily be processed, stored or served for third party apps. As we only want to process and forward events as they come in we opted for a serverless approach [again][article_2] with another Azure Function hooked up to our event hub.
 
-Below you can see how an event message ingested into our event hub looks like:
+Below we can see how an event message ingested into our event hub looks like:
 
 ```json
 {
@@ -110,11 +108,11 @@ Below you can see how an event message ingested into our event hub looks like:
 }
 ```
 
-[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
+[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. We can recognize an item data message if we take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
 
-Inside the value of the `msg` key we can find the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
+The property `msg` stores the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
 
-Below you can see a simplified version of our event hub processor Azure Function:
+Below we can see a simplified version of our event hub processor Azure Function:
 
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
@@ -157,11 +155,9 @@ Taking advantage of the body structure one could transmit any kind of event data
 
 ## Conclusion
 
-<!-- Insert Architecture diagram -->
+That's it! Two Azure Functions, an Event Hub, a Raspberry Pi and three workdays later we were able to present a functioning prototype. For our demo on day four we logged motion sensor data through our tapio-IFTTT-Connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept in the tapio ecosystem which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events are mandatory for a feature complete solution and our code base also lacks a huge refactoring... :D
 
-That's it! Two Azure Functions, an EventHub, a Raspberry Pi and three workdays later we were able to present a functioning prototype. For our demo on day four we logged motion sensor data through our tapio-IFTTT-Connector into a Google Drive sheet, turned on a RGB LED with the press of a widget button on a smartphone and configured a new IFTTT-Applet live. We didn't develop a shippable product but built a working proof of concept which can be transformed into a proper solution. Authentication, authorization and a web interface for configuring events to be be forwarded on a per machine basis are mandatory for a feature complete solution. Our code base also lacks a huge refactoring... :D
-
-Aside from resolving the actual challenges [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together in Berlin!
+But aside from resolving the actual challenges [#hackthewood2019](https://www.tapio.one/en/blog/hack-the-wood-2019) was most notably a fun event with awesome attendees who helped each other out at any time and had a great time together in Berlin!
 
 [article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
