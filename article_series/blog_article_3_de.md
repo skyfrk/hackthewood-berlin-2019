@@ -149,8 +149,6 @@ Den Webhook-Service-Schlüssel erhält man [hier](https://ifttt.com/maker_webhoo
 }
 ```
 
-Taking advantage of the body structure one could transmit any kind of event data to IFTTT. Finally we have to configure an applet in IFTTT to test our implementation. We combined [Google Sheets](https://ifttt.com/services/google_sheets) with the Webhook service for example:
-
 Wenn man den Body benutzt könnte man jede Art von Ereignisdaten an IFTTT übertragen. Schließlich müssen wir noch ein Applet in IFTTT konfigurieren, um unsere Implementierung zu testen. Wir haben beispielsweise [Google Sheets](https://ifttt.com/services/google_sheets) mit dem Webhook-Service kombiniert:
 
 ![Receiving applet config](assets/receiving-applet-config.png)
