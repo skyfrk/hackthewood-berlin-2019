@@ -84,11 +84,11 @@ Jetzt sind wir in der Lage, Bewegungen vor unserem PIR Bewegungsmelder automatis
 ...
 ```
 
-As tapio [supports](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) streaming this data into an [Azure Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) we deployed us one through the [Azure Portal](http://portal.azure.com/) and configured an app in [my tapio](https://my.tapio.one/) to forward the data to our event hub.
+Da tapio das Streaming dieser Daten in einen Azure Event Hub [unterstützt](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data), haben wir uns schnell einen [Event Hub](https://azure.microsoft.com/en-in/services/event-hubs/) über das [Azure Portal](http://portal.azure.com/) bereitgestellt und eine App in [my tapio](https://my.tapio.one/) konfiguriert, um die Daten an unseren Event Hub weiterzuleiten.
 
-Data ingested into an Azure Event Hub can easily be processed, stored or served for third party apps. As we only want to process and forward events as they come in we opted for a serverless approach [again][article_2] with another Azure Function hooked up to our event hub.
+Daten die in einem Azure Event Hub ankommen, können problemlos für Anwendungen von Drittanbietern verarbeitet, gespeichert oder bereitgestellt werden. Da wir  Ereignisse, wie sie hereinkommen, nur verarbeiten und weiterleiten wollen, haben wir uns [wieder][article_2] für einen serverlosen Ansatz entschieden, mit einer weiteren Azure Function, welche Events aus unseren Event-Hub konsumiert.
 
-Below you can see how an event message ingested into our event hub looks like:
+Hier sehen wir, wie eine in unserem Event-Hub von tapio eingespeiste Event-Nachricht aussieht:
 
 ```json
 {
@@ -108,11 +108,11 @@ Below you can see how an event message ingested into our event hub looks like:
 }
 ```
 
-[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
+[Streaming-Daten](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) von tapio, die von unserem Event-Hub empfangen werden, können unterschiedliche Strukturen aufweisen. Wir sind nur an Daten der Form [`Item Data`](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) interessiert, weil wir nur die Statusänderungen unseres PIR-Bewegungsmelder-Monitorknotens überwachen wollen. Wir können eine Streaming-Daten vom Typ `Item Data` erkennen, wenn wir einen Blick auf die Eigenschaft `msgt` (Nachrichtentyp) werfen. Streaming-Daten vom Typ `Item Data` haben immer den Nachrichtentyp `itd`.
 
-Inside the value of the `msg` key we can find the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
+Die Eigenschaft `msg` enthält die eigentliche Nachricht als JSON-Objekt. Hier suchen wir nach Nachrichten, deren `k` der zuvor konfigurierte `SrcKey` ist. Der Wert, den wir dann weiterleiten, verbirgt sich hinter dem Schlüssel `v`. Um die Dinge weiter einfach zu halten, übertragen wir hier nur eine einfache Zeichenkette (hier `motiondetected`), aber später könnte man natürlich auch beliebig komplexe Events übertragen, wenn man sie beispielsweise als JSON-Objekt serialisiert.
 
-Below you can see a simplified version of our event hub processor Azure Function:
+Unten sehen wir eine vereinfachte Version unserer Event-Hub-Prozessor-Azure-Function:
 
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
@@ -135,21 +135,23 @@ CancellationToken cancellationToken)
 }
 ```
 
-In similar fashion to our [other Azure Function][article_2] we're simply consuming messages from our event hub and then forward them to IFTTT. The `SendEventToIFTTT` method wraps a simple HTTP request towards the IFTTT Webhook service:
+Ähnlich wie bei unserer [anderen Azure Function][article_2] konsumieren wir hier einfach Nachrichten von unserem Event Hub und leiten sie dann an IFTTT weiter. Die `SendEventToIFTTT`-Methode macht dabei nichts anderes als einen einfach HTTP-Request an den IFTTT Webhook-Dienst:
 
-POST `https://maker.ifttt.com/trigger/<name of the event>/with/key/<your accounts webhook service key>`
+POST `https://maker.ifttt.com/trigger/<name of the event>/with/key/<hier webhook service account schlüssel eintragen>`
 
-The Webhook service key can be obtained [here](https://ifttt.com/maker_webhooks) (if you're logged in). The Webhook service is also able to interpret an `application/json` body if it has the structure below:
+Den Webhook-Service-Schlüssel erhält man [hier](https://ifttt.com/maker_webhooks) (wenn man bei IFTTT eingeloggt ist). Der Webhook-Service ist auch in der Lage, einen `application/json` Body zu interpretieren, wenn er die folgende Struktur hat:
 
 ```json
 {
-    "value1": "some string",
+    "value1": "ein String",
     "value2": "#MWIGA",
-    "value3": "hello world"
+    "value3": "wir sind Metadaten eines Events!"
 }
 ```
 
 Taking advantage of the body structure one could transmit any kind of event data to IFTTT. Finally we have to configure an applet in IFTTT to test our implementation. We combined [Google Sheets](https://ifttt.com/services/google_sheets) with the Webhook service for example:
+
+Wenn man den Body benutzt könnte man jede Art von Ereignisdaten an IFTTT übertragen. Schließlich müssen wir noch ein Applet in IFTTT konfigurieren, um unsere Implementierung zu testen. Wir haben beispielsweise [Google Sheets](https://ifttt.com/services/google_sheets) mit dem Webhook-Service kombiniert:
 
 ![Receiving applet config](assets/receiving-applet-config.png)
 
