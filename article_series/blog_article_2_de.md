@@ -89,7 +89,7 @@ public static async Task<IActionResult> Run(
 }
 ```
 
-Die `EventFactory`-Klasse ist dafür verantwortlich IFTTT-Event-Daten in unsere selbst definierte generische Event-Klasse umzuwandeln: 
+Die `EventFactory`-Klasse ist dafür verantwortlich IFTTT-Event-Daten in unsere selbst definierte generische Event-Klasse umzuwandeln:
 
 ```csharp
 public class Event
@@ -101,11 +101,13 @@ public class Event
 }
 ```
 
-Due to time constraints we didn't finish the implementation of the support for events with payload. However being able to transmit any payload would for example enable an IFTTT user to transmit complex statements like [these :)](https://www.youtube.com/watch?v=lx_vWkv50uk) to his machine.
+Aus Zeitgründen haben wir die Unterstützung von Events mit beliebigen Eigenschaften nicht implementiert. Events mit beliebigen Eigenschaften übertragen zu können würde es ermöglichen komplexe Anweisungen,[wie z.B. diese :)](https://www.youtube.com/watch?v=lx_vWkv50uk), an Maschinen zu übertragen.
 
 If we tried to test our system at this point events wouldn't reach their target machine because we didn't modify the tapio CloudConnector XML configuration of the machine yet. By default  you can't access any OPC UA node through Commanding API for security reasons until you configure the access in the configuration file.
 
-In the example below we extend the configuration of `DataModule01` with our OPC UA event processor server `SensorServer` which has an item write command configured: `ProcessEvent`.
+Wenn wir jetzt versuchen würden unser System zu testen, würden Events ihre Zielmaschine nicht erreichen, weil wir die XML-Konfiguration des tapio CloudConnectors noch nicht angepasst haben. Standardmäßig können wir aus Sicherheitsgründen nicht auf einen OPC UA Knoten über die Commanding API zugreifen, bis wir den Zugriff in der Konfigurationsdatei einrichten.
+
+In dem Beispiel unten erweitern wir die Konfiguartion des `DataModule01` um die Konfiguration unseres Event-verarbeitenden OPC UA Servers `SensorServer`, welche wiederum einen Schreib-Befehl `ProcessEvent` für einen Knoten konfiguriert:
 
 ```xml
 ...
@@ -137,9 +139,9 @@ In the example below we extend the configuration of `DataModule01` with our OPC 
 ...
 ```
 
-Now we're almost good to go. Events will now be forwarded to the OPC UA server running on our demo machine. But this server still lacks the configured node and the logic behind it.
+Jetzt sind wir fast startklar. Events werden nun an den OPC UA Server weitergeleitet, welcher auf unserer Demo-Maschine läuft. Aber diesem Server fehlt noch der konfigurierte Knoten und die dahinter stehende Logik.
 
-So lets add a `DataVariableState` node of type `String` to the address space of our OPC UA server. To also be able to process incoming events we have to be able to react to every single status change. We implemented that by attaching a custom event handler to the `WriteCalled` event of our node:
+Also fügen wir einen `DataVariableState` Knoten vom Typ `String` dem Adressraum unseres OPC UA Servers hinzu. Um eingehende Events verarbeiten zu können, müssen wir nun auf jede einzelne Statusänderung des Knotes reagieren können. Wir haben das implementiert, indem wir einen benutzerdefinierten Event-Handler an das Event `WriteCalled` unseres Knotens angehängt haben:
 
 ```csharp
 protected override void CreateAddressSpace()
@@ -153,9 +155,9 @@ protected override void CreateAddressSpace()
 }
 ```
 
-In order to physically show that our demo machine has received an event we want to flash the LED attached to our demo machine in different ways. Therefore we have to implement an abstraction layer to control the LED connected through the GPIO interface of our demo machine.
+Um physisch zu zeigen, dass unsere Demo-Maschine ein Event erhalten hat, möchten wir die an unserer Demo-Maschine angebrachte LED auf verschiedene Weise blinken lassen. Daher müssen wir eine Abstraktionsschicht implementieren, um die LED zu steuern, die über die GPIO-Schnittstelle unserer Demo-Maschine angeschlossen ist.
 
-So we have to define an interface for a LED to abstract the GPIO logic and create another one for a LED controller which is additionally capable of processing light sequences:
+Daher definieren wir eine Schnittstelle für die LED, um die GPIO-Logik zu abstrahieren, und eine weitere für einen LED-Controller, der zusätzlich in der Lage ist, Lichtsequenzen zu verarbeiten:
 
 ```csharp
 public interface ILedController
@@ -171,7 +173,7 @@ public interface ILed
 }
 ```
 
-Now we have to implement the LED interface using the [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) NuGet package:
+Dann müssen wir noch die LED-Schnittstelle mit dem NuGet-Paket [Unosquare.RaspberryIO](https://github.com/unosquare/raspberryio) implementieren:
 
 ```csharp
 public class Led : ILed
@@ -220,7 +222,7 @@ public class Led : ILed
 }
 ```
 
-Now we're finally able to process events in our event handler by interpreting the new value of the node as event and acting differently based on the name of the event. This part would naturally be fully dynamic and the sequence processor would work in a proper version of the tapio-IFTTT-Connector which wasn't implemented in two days.
+Jetzt sind wir endlich in der Lage, Events in unserem Eventhandler zu verarbeiten, indem wir den neuen Wert des Knotens als Event interpretieren und je nach Name des Events anders handeln. Dieser Teil wäre natürlich in einer ausgefeilten Version des tapio-IFTTTT-Connectors voll dynamisch und könnte Events verschiedenster Art verarbeiten.
 
 ```csharp
 private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
@@ -255,6 +257,10 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
 ```
 
 We're done! We're now able to process events coming from IFTTT using just one Azure Function and a OPC UA server. In the [next article][article_3] in this series we're looking at the implementation of the reversed route: Forwarding a event from a tapio-ready machine to IFTTT.
+
+Wir sind fertig!
+
+Wir sind nun in der Lage, Events aus IFTTT mit nur einer Azure Function und einem OPC UA-Server zu verarbeiten! Im [nächsten Artikel][article_3] dieser Serie betrachten wir die Implementierung der umgekehrten Route: Events von einer tapio-ready Maschine an IFTTT weiterzuleiten.
 
 [article_1]: https://www.tapio.one/de/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/de/blog/connecting-the-digital-worlds-2-3
