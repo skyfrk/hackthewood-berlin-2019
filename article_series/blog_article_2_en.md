@@ -55,9 +55,9 @@ To actually develop and debug with real HTTP requests from IFTTT we have to crea
 
 ![Applet config](assets/applet-config.png)
 
-Because of our limited time frame to create everything we opted for a plain text body with a simple event name to lower complexity. Further down the line one could however transmit full blown JSON objects.
+Due to our limited time frame we opted for a plain text body with a simple event name to lower complexity. Further down the line one could however transmit full blown JSON objects.
 
-Now for the good stuff: The implementation of the Azure Function. The code below basically waits for GET or POST requests, parses the body of the request, interprets it as event and then forwards it to the machine using the Commanding API.
+Now for the good stuff: The implementation of the Azure Function. The code below basically waits for GET or POST requests, parses the body of the request, interprets it as event and then forwards it to our machine using the Commanding API.
 
 The Commanding API is normally used to alter item values or call methods on a OPC UA server associated with the CloudConnector but we figured we can use an item write request as well to transmit an event. On OPC UA server side we then just have to wait for item state changes and interpret them as events.
 
