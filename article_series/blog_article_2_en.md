@@ -254,7 +254,9 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
 }
 ```
 
-We're done! We're now able to process events coming from IFTTT using just one Azure Function and a OPC UA server. In the [next article][article_3] in this series we're looking at the implementation of the reversed route: Forwarding a event from a tapio-ready machine to IFTTT.
+We're done!
+
+We're now able to process events coming from IFTTT using just one Azure Function and a OPC UA server! In the [next article][article_3] in this series we're looking at the implementation of the reversed route: Forwarding events from a tapio-ready machine to IFTTT.
 
 [article_1]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-1-3
 [article_2]: https://www.tapio.one/en/blog/connecting-the-digital-worlds-2-3
