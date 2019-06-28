@@ -108,11 +108,11 @@ Below we can see how an event message ingested into our event hub looks like:
 }
 ```
 
-[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. You can recognize an item data message if you take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
+[Streaming data](https://developer.tapio.one/docs/TapioDataCategories.html#streaming-data) messages from tapio received by our event hub can have different structures. We're only interested into [item data](https://developer.tapio.one/docs/TapioDataCategories.html#item-data) messages because we just want to monitor status changes of our PIR motion sensor monitor node. We can recognize an item data message if we take a look at the `msgt` (message type) key. Every item data message has the type `itd`.
 
-Inside the value of the `msg` key we can find the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
+The property `msg` stores the actual item data message as JSON object. Here we're looking for messages with their `k` (key) being the previously configured `SrcKey`. The value we're forwarding hides behind the `v` key. Once again to keep things simple this is only a string (`motiondetected`) but it could be any complex event object when serialized as JSON object for example.
 
-Below you can see a simplified version of our event hub processor Azure Function:
+Below we can see a simplified version of our event hub processor Azure Function:
 
 ```csharp
 [FunctionName("EventHubProcessorFunction")]
