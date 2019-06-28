@@ -1,6 +1,6 @@
 # Connecting the digital worlds (2/3)
 
-In the [previous article][article_1] we clarified the idea of the challenge and set up a demo machine. In this article we take on the implementation of the first route of events in the tapio-IFTTT-Connector: From IFTTT to tapio-ready machines.
+Im[vorherigen Artikel][article_1] haben wir die Idee der Challenge erklärt und eine Demo-Maschine eingerichtet. In diesem Artikel nehmen wir uns die Implementierung der ersten Route für Events im tapio-IFTTTT-Connector vor: Von IFTTTT bis hin zu tapio-ready Maschinen.
 
 * [Connecting the digital worlds (1/3)][article_1]
 * [Connecting the digital worlds (2/3)][article_2]
@@ -8,28 +8,28 @@ In the [previous article][article_1] we clarified the idea of the challenge and 
 
 ![Sequence diagram](assets/tapio-ifttt-sequence-from-ifttt.png)
 
-As [previously specified][article_1] we want to use the IFTTT Webhook service so that when an applet using the Webhook service is triggered we will receive a HTTP request at the endpoint specified in the applet. We then want to process the request and forward the event to the machine using [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html). The Commanding API is typically used to interact with [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/) servers running on tapio-ready machines.
+Wie [bereits erwähnt][article_1], möchten wir den IFTTT Webhook-Dienst verwenden, so dass wir beim Auslösen eines Applets, das den Webhook-Dienst verwendet, eine HTTP-Request an dem im Applet angegebenen Endpunkt gesendet wird. Dann wollen wir die Request bearbeiten und das Event über die [tapios Commanding API](https://developer.tapio.one/docs/Commanding.html) an die Maschine weiterleiten. Die Commanding-API wird typischerweise verwendet, um mit [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/)-Servern zu interagieren, die auf tapio-ready Maschinen laufen.
 
-When we recognized that our tapio-IFTTT-Connector simply has to receive a HTTP request, then process it and finally make another HTTP request we opted for a [serverless](https://martinfowler.com/articles/serverless.html) implementation approach. As you can tell by its name there are no servers in a serverless architecture but rather snippets of code which execute on certain conditions. Of course these snippets still run on a server but not on our servers. This way we can safe money because we don't have to operate or rent a server 24/7 and in addition we don't have to worry about setting up a server, installing a runtime environment etc. There are multiple products available for implementing serverless architectures. We picked Azure Functions from Microsofts cloud platform Azure.
+Als wir feststellten, dass unser tapio-IFTTTT-Connector lediglich eine HTTP-Request empfangen, dann verarbeiten und schließlich eine weitere HTTP-Request stellen muss, haben wir uns für einen [serverlosen Implementierungsansatz][(https://martinfowler.com/articles/serverless.html)] entschieden. Wie man am Namen erkennen kann, gibt es in einer serverlosen Architektur keine Server, sondern Codeschnipsel, die nur unter bestimmten Bedingungen ausgeführt werden. Natürlich laufen diese Ausschnitte immer noch auf einem Server, aber nicht auf unseren Servern. Auf diese Weise können wir Geld sparen, weil wir keinen Server rund um die Uhr betreiben oder mieten müssen und uns außerdem keine Gedanken um die Einrichtung eines Servers, die Installation einer Laufzeitumgebung usw. machen müssen. Für die Implementierung von serverlosen Architekturen stehen mehrere Produkte zur Verfügung. Wir haben uns für [Azure Functions](https://azure.microsoft.com/de-de/services/functions/) von Microsofts Cloud-Plattform Azure entschieden.
 
-When we started coding the desire for proper debugging arised rather quickly. So how does one debug an Azure Function? You can't simply establish a debugging session to your deployed function. Instead you have to run the Azure Function locally and forward the HTTP requests from IFTTT to your local machine and this is where [ngrok](https://ngrok.com/) came in handy.
+Nach den ersten Zeilen Code, entstand recht schnell der Wunsch nach einer Möglichkeit unsere Azure Function zu debuggen. Wie also debuggt man eine Azure Function? Man kann nicht einfach eine Debugging-Session zu einer Azure Function in der Cloud aufbauen. Stattdessen müssen wir die Azure Function lokal ausführen und die HTTP-Requests von IFTTT an unseren lokalen Rechner weiterleiten. Hier war uns [ngrok](https://ngrok.com/) sehr nützlich.
 
-With [ngrok](https://ngrok.com/) you're able to expose a local server behind a NAT or firewall to the internet and therefore IFTTT and it's dead simple:
+Mit [ngrok](https://ngrok.com/) können wir einen lokalen Server hinter einem NAT oder einer Firewall dem Internet und damit IFTTT zugänglich machen und zwar ganz einfach:
 
-You only have to register on [ngrok.com](https://ngrok.com/), download the executable and create yourself an `auth token` (replace `some_token` with the key provided for your account on [ngrok.com](https://ngrok.com/)).
+Zuerst müssen wir uns auf [ngrok.com](https://ngrok.com/) registrieren, dann das Programm herunterladen und uns schließlich einen Authentifizierungs-Token erstellen. Dazu `ein_token` in dem Befehl unten mit dem Token ersetzten, der auf [ngrok.com](https://ngrok.com/) für unseren Account bereit gestellt wird.
 
 ```powershell
-PS C:\Program Files\ngrok> ./ngrok authtoken some_token
+PS C:\Program Files\ngrok> ./ngrok authtoken ein_token
 Authtoken saved to configuration file: C:\Users\Simon/.ngrok2/ngrok.yml   
 ```
 
-Now you're already able to expose a local port. In the example below we're exposing the local port our Azure Function is using:
+Jetzt sind wir dazu in der Lage einen lokalen Port unter einer ngrok URL dem Internet freizugeben. Im folgenden Beispiel geben wir unsere lokal auf Port 1337 laufende Azure Function frei:
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok http 1337
 ```
 
-After running the above you're given a monitor screen in your terminal. Behind the `Forwarding` keyword you can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. You can verify if everything is working correctly by opening the ngrok  URL in your web browser (sending a GET request). As you can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
+After running the above we're given a monitor screen in our terminal. Behind the `Forwarding` keyword we can see active tunnels. In our example below our local Azure Function is now exposed behind `http://qyt7q40w03.ngrok.io`. We can verify if everything is working correctly by opening the ngrok URL in our web browser (sending a GET request). As we can see at the bottom of the output a GET request was logged as expected. It works! If you'd like to have a deeper look in incoming requests you can explore ngroks web interface running locally on port `4040`.
 
 ```shell
 ngrok by @inconshreveable                               (Ctrl+C to quit)
