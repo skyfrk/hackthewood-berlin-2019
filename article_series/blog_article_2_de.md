@@ -103,8 +103,6 @@ public class Event
 
 Aus Zeitgründen haben wir die Unterstützung von Events mit beliebigen Eigenschaften nicht implementiert. Events mit beliebigen Eigenschaften übertragen zu können würde es ermöglichen komplexe Anweisungen,[wie z.B. diese :)](https://www.youtube.com/watch?v=lx_vWkv50uk), an Maschinen zu übertragen.
 
-If we tried to test our system at this point events wouldn't reach their target machine because we didn't modify the tapio CloudConnector XML configuration of the machine yet. By default  you can't access any OPC UA node through Commanding API for security reasons until you configure the access in the configuration file.
-
 Wenn wir jetzt versuchen würden unser System zu testen, würden Events ihre Zielmaschine nicht erreichen, weil wir die XML-Konfiguration des tapio CloudConnectors noch nicht angepasst haben. Standardmäßig können wir aus Sicherheitsgründen nicht auf einen OPC UA Knoten über die Commanding API zugreifen, bis wir den Zugriff in der Konfigurationsdatei einrichten.
 
 In dem Beispiel unten erweitern wir die Konfiguartion des `DataModule01` um die Konfiguration unseres Event-verarbeitenden OPC UA Servers `SensorServer`, welche wiederum einen Schreib-Befehl `ProcessEvent` für einen Knoten konfiguriert:
@@ -255,8 +253,6 @@ private void OnProcessEventCommandWrite(object sender, ValueWriteEventArgs e)
     }
 }
 ```
-
-We're done! We're now able to process events coming from IFTTT using just one Azure Function and a OPC UA server. In the [next article][article_3] in this series we're looking at the implementation of the reversed route: Forwarding a event from a tapio-ready machine to IFTTT.
 
 Wir sind fertig!
 
