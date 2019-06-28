@@ -16,7 +16,7 @@ When we started coding the desire for proper debugging arised rather quickly. So
 
 With [ngrok](https://ngrok.com/) we're able to expose a local server behind a NAT or firewall to the internet and therefore IFTTT and it's dead simple:
 
-We only have to register on [ngrok.com](https://ngrok.com/), download the executable and create ourselves an `auth token` (replace `some_token` with the key provided for our account on [ngrok.com](https://ngrok.com/)).
+We only have to register on [ngrok.com](https://ngrok.com/), download the executable and create ourselves an authentication token (replace `some_token` with the key provided for our account on [ngrok.com](https://ngrok.com/)).
 
 ```powershell
 PS C:\Program Files\ngrok> ./ngrok authtoken some_token
