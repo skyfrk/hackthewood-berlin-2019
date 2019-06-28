@@ -46,7 +46,7 @@ protected override void CreateAddressSpace()
 }
 ```
 
-Then we have to add an event handler method to our node manager which updates our `MotionSensorState` node when called:
+Then we have to add a method to our node manager which updates our `MotionSensorState` node when called:
 
 ```csharp
 public void OnMotionDetected()
